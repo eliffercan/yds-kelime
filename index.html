@@ -25,7 +25,6 @@
             min-height: 100vh;
             margin: 0;
             padding: 15px;
-            /* Mobilde kaydırmayı engellemek için */
             overscroll-behavior: none;
         }
 
@@ -43,7 +42,6 @@
             min-height: 80vh; 
         }
 
-        /* Üst Bar ve Butonlar */
         .header-bar {
             display: flex;
             justify-content: space-between;
@@ -66,10 +64,7 @@
             font-size: 22px;
         }
 
-        /* İlerleme ve Skor */
-        .progress-container {
-            margin-bottom: 20px;
-        }
+        .progress-container { margin-bottom: 20px; }
 
         .progress-bar {
             height: 8px;
@@ -95,7 +90,6 @@
             margin-top: 5px;
         }
 
-        /* Kart Alanı */
         .card-area {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -103,7 +97,7 @@
             border-radius: 15px;
             margin-bottom: 20px;
             position: relative;
-            flex-grow: 1; /* Esnek yükseklik */
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -131,7 +125,6 @@
             word-wrap: break-word;
         }
 
-        /* Şıklar */
         .options-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -157,9 +150,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        button.option-btn:active {
-            transform: scale(0.98);
-        }
+        button.option-btn:active { transform: scale(0.98); }
 
         button.option-btn.correct {
             background-color: var(--success);
@@ -173,7 +164,6 @@
             border-color: var(--error);
         }
 
-        /* Sonraki Butonu */
         .next-btn {
             width: 100%;
             padding: 15px;
@@ -187,7 +177,6 @@
             display: none;
         }
 
-        /* MODAL (Kelime Ekleme Paneli) */
         .modal {
             display: none;
             position: fixed;
@@ -264,7 +253,6 @@
         .btn-secondary { background-color: #eee; color: #333; }
         .btn-danger { background-color: #ff7675; color: white; margin-top:20px;}
 
-        /* Tab sistemi */
         .tabs {
             display: flex;
             margin-bottom: 20px;
@@ -354,7 +342,6 @@
                 <input type="text" id="inputSyn" placeholder="Örn: Plentiful, Ample">
             </div>
             <button class="action-btn btn-primary" onclick="addSingleWord()">Listeye Ekle ve Kaydet</button>
-            <p style="font-size:11px; color:#999; margin-top:10px;">* Eklediğin kelimeler telefon hafızasında saklanır.</p>
         </div>
 
         <div id="tab-toplu" class="tab-content">
@@ -372,19 +359,127 @@
 </div>
 
 <script>
-    // --- VARSAYILAN KELİMELER (FABRİKA VERİSİ) ---
+    // --- BURAYA SENİN TÜM KELİMELERİNİ GÖMDÜM ---
     const defaultWords = [
-        { en: "Important", tr: "Önemli", syn: "Crucial, Critical, Vital" },
+        // TABLO 1
+        { en: "Important", tr: "Önemli", syn: "Crucial, Critical, Vital, Significant" },
+        { en: "Crucial", tr: "Önemli", syn: "Important, Critical, Vital, Significant" },
+        { en: "Critical", tr: "Önemli", syn: "Important, Crucial, Vital, Significant" },
+        { en: "Vital", tr: "Önemli", syn: "Important, Crucial, Critical, Significant" },
+        { en: "Significant", tr: "Önemli", syn: "Important, Crucial, Critical, Vital" },
+        { en: "Central", tr: "Önemli (Merkezi)", syn: "Fundamental, Main, Important" },
         { en: "Necessary", tr: "Gerekli", syn: "Needed, Required, Essential" },
-        { en: "Strange", tr: "Tuhaf", syn: "Weird, Odd, Bizarre" },
-        { en: "Huge", tr: "Büyük", syn: "Immense, Giant, Vast" },
-        { en: "Abundant", tr: "Bol", syn: "Plentiful, Ample, Numerous" },
+        { en: "Needed", tr: "Gerekli", syn: "Necessary, Required" },
+        { en: "Required", tr: "Gerekli", syn: "Necessary, Needed" },
+        { en: "Fundamental", tr: "Temel", syn: "Basic, Essential" },
+        { en: "Basic", tr: "Temel", syn: "Fundamental, Essential" },
+        { en: "Essential", tr: "Temel / Gerekli", syn: "Fundamental, Basic, Necessary" },
+        { en: "Mandatory", tr: "Zorunlu", syn: "Obligatory, Compulsory, Enforced" },
+        { en: "Obligatory", tr: "Zorunlu", syn: "Mandatory, Compulsory" },
+        { en: "Compulsory", tr: "Zorunlu", syn: "Mandatory, Obligatory" },
+        { en: "Enforced", tr: "Zorunlu (Dayatılmış)", syn: "Mandatory, Compulsory" },
+        { en: "Strange", tr: "Tuhaf / Garip", syn: "Weird, Odd, Bizarre, Peculiar" },
+        { en: "Weird", tr: "Tuhaf / Garip", syn: "Strange, Odd, Bizarre" },
+        { en: "Odd", tr: "Tuhaf / Garip", syn: "Strange, Weird, Peculiar" },
+        { en: "Bizarre", tr: "Tuhaf / Garip", syn: "Strange, Weird, Odd" },
+        { en: "Peculiar", tr: "Tuhaf / Garip", syn: "Strange, Odd, Weird" },
+        { en: "Ridiculous", tr: "Saçma", syn: "Absurd, Irrational, Silly" },
+        { en: "Absurd", tr: "Absürt / Saçma", syn: "Ridiculous, Irrational" },
+        { en: "Irrational", tr: "Mantıksız / Saçma", syn: "Illogical, Absurd" },
+        { en: "Silly", tr: "Aptalca / Saçma", syn: "Ridiculous, Foolish" },
+        { en: "Fantastic", tr: "Harika", syn: "Wonderful, Excellent, Superb" },
+        { en: "Wonderful", tr: "Harika", syn: "Fantastic, Excellent, Outstanding" },
+        { en: "Excellent", tr: "Mükemmel", syn: "Outstanding, Superb, Fantastic" },
+        { en: "Outstanding", tr: "Olağanüstü / Seçkin", syn: "Extraordinary, Excellent" },
+        { en: "Extraordinary", tr: "Olağanüstü", syn: "Outstanding, Exceptional" },
+        { en: "Superb", tr: "Mükemmel / Harika", syn: "Excellent, Fantastic" },
+        { en: "Abundant", tr: "Bol / Çok miktarda", syn: "Plentiful, Ample, Numerous" },
+        { en: "Numerous", tr: "Sayısız / Çok", syn: "Many, Abundant" },
+        { en: "Plentiful", tr: "Bol", syn: "Abundant, Ample" },
+        { en: "Ample", tr: "Bol / Yeterli", syn: "Abundant, Plentiful" },
+        { en: "Considerable", tr: "Önemli ölçüde / Epey", syn: "Substantial, Significant" },
+        { en: "Substantial", tr: "Önemli ölçüde / Büyük", syn: "Considerable, Large" },
+        { en: "Few", tr: "Az", syn: "Little, Meagre" },
+        { en: "Little", tr: "Az / Küçük", syn: "Few, Small" },
+        { en: "Meagre", tr: "Az / Yetersiz", syn: "Scant, Limited" },
+        { en: "Low", tr: "Düşük / Az", syn: "Small, Little" },
+        { en: "Scarce", tr: "Ender / Kıt", syn: "Rare, Insufficient" },
+        { en: "Rare", tr: "Nadir", syn: "Scarce, Uncommon" },
+        { en: "Inadequate", tr: "Yetersiz", syn: "Insufficient, Limited" },
+        { en: "Insufficient", tr: "Yetersiz", syn: "Inadequate, Short of" },
+        { en: "Limited", tr: "Sınırlı", syn: "Restricted, Confined" },
+        { en: "Restricted", tr: "Kısıtlı / Sınırlı", syn: "Limited, Constrained" },
+        { en: "Short of", tr: "Eksik", syn: "Lack of, Wanting" },
+        { en: "Lack of", tr: "Eksiklik / Yoksunluk", syn: "Shortage, Dearth" },
+        { en: "Tiny", tr: "Ufak / Minik", syn: "Minute, Small" },
+        { en: "Minute", tr: "Minik / Çok küçük", syn: "Tiny, Microscopic" },
+        { en: "Paltry", tr: "Önemsiz / Değersiz", syn: "Insignificant, Meagre" },
+        { en: "Insignificant", tr: "Önemsiz", syn: "Negligible, Unimportant" },
+        { en: "Negligible", tr: "İhmal edilebilir", syn: "Insignificant, Trivial" },
+        { en: "Brief", tr: "Kısa / Öz", syn: "Short, Concise" },
+        { en: "Short", tr: "Kısa", syn: "Brief, Concise" },
+        { en: "Concise", tr: "Kısa ve öz", syn: "Brief, Short" },
+
+        // TABLO 2
+        { en: "Huge", tr: "Büyük / Devasa", syn: "Immense, Giant, Vast, Enormous" },
+        { en: "Immense", tr: "Muazzam", syn: "Huge, Enormous, Vast" },
+        { en: "Giant", tr: "Dev", syn: "Gigantic, Huge, Colossal" },
+        { en: "Gigantic", tr: "Devasa", syn: "Giant, Huge, Enormous" },
+        { en: "Vast", tr: "Geniş / Büyük", syn: "Huge, Immense, Extensive" },
+        { en: "Enormous", tr: "Kocaman", syn: "Huge, Immense, Giant" },
+        { en: "Profound", tr: "Derin (Etki/Anlam)", syn: "Deep, Intense" },
+        { en: "Deep", tr: "Derin", syn: "Profound, Bottomless" },
+        { en: "Separate", tr: "Ayrı", syn: "Distinct, Disconnected" },
+        { en: "Distinct", tr: "Belirgin / Ayrı", syn: "Separate, Different, Clear" },
+        { en: "Different", tr: "Farklı", syn: "Distinct, Dissimilar" },
+        { en: "Noticeable", tr: "Fark edilebilir", syn: "Distinct, Obvious, Visible" },
+        { en: "Divergent", tr: "Farklı / Ayrılan", syn: "Different, Deviating" },
+        { en: "Diverse", tr: "Çeşitli", syn: "Various, Varied" },
+        { en: "Various", tr: "Çeşitli", syn: "Diverse, Several" },
+        { en: "Several", tr: "Birkaç / Çeşitli", syn: "Various, Some" },
+        { en: "Evident", tr: "Açık / Belirgin", syn: "Clear, Apparent, Obvious" },
+        { en: "Clear", tr: "Net / Açık", syn: "Evident, Apparent, Obvious" },
+        { en: "Apparent", tr: "Aşikar / Görünür", syn: "Evident, Obvious, Clear" },
+        { en: "Obvious", tr: "Bariz / Ortada", syn: "Evident, Clear, Apparent" },
+        { en: "Shining", tr: "Parlayan", syn: "Luminous, Gleaming, Bright" },
+        { en: "Luminous", tr: "Işıklı / Parlak", syn: "Shining, Glowing" },
+        { en: "Gleaming", tr: "Parıltılı", syn: "Shining, Luminous" },
+        { en: "Lively", tr: "Canlı / Hayat dolu", syn: "Vibrant, Vivid, Energetic" },
+        { en: "Vibrant", tr: "Canlı / Titreşimli", syn: "Lively, Vivid" },
+        { en: "Vivid", tr: "Canlı (Renk/Anı)", syn: "Bright, Clear, Lively" },
+        { en: "Visible", tr: "Görülebilir", syn: "Noticeable, Observable" },
+        { en: "Observable", tr: "Gözlemlenebilir", syn: "Visible, Noticeable" },
+        { en: "Bright", tr: "Parlak", syn: "Shining, Luminous, Vivid" },
         { en: "Invaluable", tr: "Paha biçilemez", syn: "Priceless, Precious" },
+        { en: "Valuable", tr: "Değerli", syn: "Precious, Worthwhile" },
+        { en: "Priceless", tr: "Paha biçilemez", syn: "Invaluable, Precious" },
+        { en: "Precious", tr: "Kıymetli", syn: "Valuable, Cherished" },
+        { en: "Bankrupt", tr: "İflas etmiş", syn: "Broke, Penniless, Insolvent" },
+        { en: "Broke", tr: "Parasız / Beş parasız", syn: "Penniless, Bankrupt" },
+        { en: "Penniless", tr: "Parasız", syn: "Broke, Destitute" },
+        { en: "Feasible", tr: "Yapılabilir", syn: "Viable, Practical, Possible" },
+        { en: "Viable", tr: "Uygulanabilir / Yaşayabilir", syn: "Feasible, Practical" },
+        { en: "Practical", tr: "Pratik / Kullanışlı", syn: "Feasible, Functional" },
+        { en: "Applicable", tr: "Uygulanabilir", syn: "Relevant, Suitable" },
+        { en: "Profitable", tr: "Karlı", syn: "Lucrative, Gainful" },
+        { en: "Lucrative", tr: "Kazançlı", syn: "Profitable, Gainful" },
+        { en: "Gainful", tr: "Kazançlı", syn: "Profitable, Paying" },
         { en: "Innovative", tr: "Yenilikçi", syn: "Inventive, Creative" },
-        { en: "Evident", tr: "Açık/Net", syn: "Clear, Apparent, Obvious" },
-        { en: "Feasible", tr: "Yapılabilir", syn: "Viable, Practical" },
-        { en: "Mandatory", tr: "Zorunlu", syn: "Obligatory, Compulsory" }
+        { en: "Inventive", tr: "Yaratıcı", syn: "Innovative, Creative" },
+        { en: "Pioneering", tr: "Öncü", syn: "Innovative, Leading" },
+        { en: "Competent", tr: "Yetkin", syn: "Qualified, Capable, Skilled" },
+        { en: "Qualified", tr: "Nitelikli", syn: "Competent, Certified" },
+        { en: "Capable of", tr: "Yetenekli / -e muktedir", syn: "Able to, Competent" },
+        { en: "Skilled", tr: "Becerikli", syn: "Expert, Proficient" },
+        { en: "Appropriate", tr: "Uygun", syn: "Suitable, Proper, Fit" },
+        { en: "Fit", tr: "Uygun / Zinde", syn: "Suitable, Appropriate" },
+        { en: "Proper", tr: "Düzgün / Uygun", syn: "Appropriate, Correct" },
+        { en: "Suitable", tr: "Elverişli / Uygun", syn: "Appropriate, Right" }
     ];
+
+    // Kayıt adını değiştirdim ki eski 10 kelimelik kayıtla karışmasın.
+    // Otomatik olarak yeni 'full' listeyi yükleyecek.
+    const STORAGE_KEY = 'ydsKelimeleri_full'; 
 
     let kelimeListesi = [];
     let gameData = {
@@ -395,29 +490,30 @@
         currentQuestion: {}
     };
 
-    // --- VERİ YÖNETİMİ (LOCALSTORAGE) ---
     function loadData() {
-        const storedData = localStorage.getItem('ydsKelimeleri');
+        const storedData = localStorage.getItem(STORAGE_KEY);
         if (storedData) {
             kelimeListesi = JSON.parse(storedData);
         } else {
-            kelimeListesi = [...defaultWords]; // Kopya oluştur
+            kelimeListesi = [...defaultWords];
+            saveData(false); // Varsayılanları kaydet ama uyarı verme
         }
         document.getElementById('totalWordCount').innerText = kelimeListesi.length;
     }
 
-    function saveData() {
-        localStorage.setItem('ydsKelimeleri', JSON.stringify(kelimeListesi));
+    function saveData(showAlert = true) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(kelimeListesi));
         document.getElementById('totalWordCount').innerText = kelimeListesi.length;
-        alert("Kelimeler başarıyla kaydedildi!");
+        if(showAlert) alert("Kelimeler başarıyla kaydedildi!");
     }
 
     function resetData() {
-        if(confirm("Eklediğin tüm özel kelimeler silinecek ve başa dönülecek. Emin misin?")) {
-            localStorage.removeItem('ydsKelimeleri');
+        if(confirm("Tüm veriler fabrika ayarlarına dönecek. Emin misin?")) {
+            localStorage.removeItem(STORAGE_KEY);
             loadData();
             initGame();
             closeModal();
+            alert("Veriler sıfırlandı. Tüm kelimeler geri yüklendi.");
         }
     }
 
@@ -434,12 +530,10 @@
         kelimeListesi.push({ en, tr, syn });
         saveData();
         
-        // Formu temizle
         document.getElementById('inputEn').value = '';
         document.getElementById('inputTr').value = '';
         document.getElementById('inputSyn').value = '';
         
-        // Oyunu yeniden başlat ki yeni kelime havuza girsin
         if(confirm("Kelime eklendi. Testi yeni kelimeyle yeniden başlatmak ister misin?")) {
             initGame();
             closeModal();
@@ -451,7 +545,6 @@
             const raw = document.getElementById('jsonInput').value;
             const newData = JSON.parse(raw);
             if(Array.isArray(newData)) {
-                // Mevcut listenin üzerine ekle
                 kelimeListesi = kelimeListesi.concat(newData);
                 saveData();
                 document.getElementById('jsonInput').value = '';
@@ -467,9 +560,8 @@
         }
     }
 
-    // --- OYUN MANTIĞI ---
     function initGame() {
-        loadData(); // Verileri tazelediğinden emin ol
+        loadData();
         document.getElementById('gameScreen').style.display = 'block';
         document.getElementById('resultScreen').style.display = 'none';
         
@@ -477,7 +569,6 @@
         gameData.currentIndex = 0;
         gameData.isActive = true;
 
-        // Karıştır
         gameData.questionOrder = Array.from({length: kelimeListesi.length}, (_, i) => i);
         gameData.questionOrder.sort(() => Math.random() - 0.5);
 
@@ -505,7 +596,6 @@
         const listIndex = gameData.questionOrder[gameData.currentIndex];
         const wordObj = kelimeListesi[listIndex];
         
-        // Soru Modu: Eş anlamlısı yoksa mecburen Türkçe sor
         const hasSyn = wordObj.syn && wordObj.syn.length > 2;
         const mode = (Math.random() > 0.5 && hasSyn) ? 'syn' : 'tr';
         
@@ -516,7 +606,6 @@
             fullObj: wordObj
         };
 
-        // Görsel Ayarlar
         document.getElementById('mainWord').innerText = gameData.currentQuestion.word;
         const badge = document.getElementById('qType');
         
@@ -538,9 +627,7 @@
         let options = [];
         let correctText = "";
 
-        // Doğru cevabı belirle
         if (mode === 'syn') {
-            // Virgülle ayrılmışsa birini seç
             const syns = correctObj.syn.split(',');
             correctText = syns[Math.floor(Math.random() * syns.length)].trim();
         } else {
@@ -550,7 +637,6 @@
         gameData.currentQuestion.correctText = correctText;
         options.push(correctText);
 
-        // Yanlış şık üret
         let safetyCounter = 0;
         while(options.length < 4 && safetyCounter < 100) {
             safetyCounter++;
@@ -560,20 +646,15 @@
             if(mode === 'tr') {
                 distractor = randomObj.tr;
             } else {
-                // Yanlış şık için başka bir kelimenin İngilizcesini veya Eş anlamlısını kullan
-                // Karmaşıklığı önlemek için direkt İngilizcesini koyuyoruz (daha zorlayıcı olur)
-                // Veya varsa eş anlamlısını
                 distractor = randomObj.syn ? randomObj.syn.split(',')[0].trim() : randomObj.en;
             }
 
             if(!options.includes(distractor) && distractor !== correctText) {
-                // Basit bir çakışma kontrolü
                 if(mode === 'syn' && correctObj.syn.includes(distractor)) continue;
                 options.push(distractor);
             }
         }
 
-        // Karıştır
         options.sort(() => Math.random() - 0.5);
 
         options.forEach(opt => {
@@ -597,7 +678,6 @@
             gameData.score += 10;
         } else {
             btn.classList.add('wrong');
-            // Doğruyu göster
             allBtns.forEach(b => {
                 if(b.innerText === gameData.currentQuestion.correctText) b.classList.add('correct');
             });
@@ -605,8 +685,6 @@
 
         gameData.currentIndex++;
         document.getElementById('score').innerText = `Puan: ${gameData.score}`;
-        
-        // Mobilde butona basmak zor olabilir, otomatik geçiş eklenebilir ama buton daha güvenli
         document.getElementById('nextBtn').style.display = 'block';
     }
 
@@ -627,7 +705,6 @@
         document.getElementById('resultFeedback').innerText = msg;
     }
 
-    // --- MODAL İŞLEMLERİ ---
     function openModal() { document.getElementById('settingsModal').style.display = 'flex'; }
     function closeModal() { document.getElementById('settingsModal').style.display = 'none'; }
     
@@ -650,8 +727,6 @@
         }
     }
 
-    // Başlat
-    loadData(); // Önce veri yükle
     initGame(); 
 
 </script>
