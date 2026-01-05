@@ -3,359 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YDS Full Deneme</title>
+    <title>YDS Pro - Kelime Avcısı</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        :root {
-            --primary: #4a90e2;
-            --secondary: #f5f6fa;
-            --text: #2c3e50;
-            --success: #2ecc71;
-            --error: #e74c3c;
-            --card-bg: #ffffff;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--secondary);
-            color: var(--text);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 15px;
-            overscroll-behavior: none;
-        }
-
-        .container {
-            background-color: var(--card-bg);
-            width: 100%;
-            max-width: 600px;
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            min-height: 85vh;
-        }
-
-        .header-bar {
-            margin-bottom: 10px;
-        }
-
-        h1 {
-            color: var(--primary);
-            margin: 0;
-            font-size: 20px;
-        }
-
-        .info-text {
-            font-size: 12px;
-            color: #95a5a6;
-            margin-top: 5px;
-        }
-
-        /* Skor ve İlerleme */
-        .score-board {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 15px;
-            background-color: #f8f9fa;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            font-weight: bold;
-            color: #7f8c8d;
-            font-size: 14px;
-        }
-
-        .progress-bar {
-            height: 6px;
-            background-color: #eee;
-            border-radius: 3px;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background-color: var(--primary);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        /* Soru Kartı */
-        .card-area {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px 15px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            position: relative;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .question-badge {
-            position: absolute;
-            top: 15px;
-            font-size: 11px;
-            background: rgba(0,0,0,0.25);
-            padding: 4px 12px;
-            border-radius: 20px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            font-weight: 800;
-        }
-
-        .word-display {
-            font-size: 34px;
-            font-weight: 800;
-            margin: 10px 0;
-            line-height: 1.2;
-            word-wrap: break-word;
-        }
-
-        /* Şıklar */
-        .options-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        button.option-btn {
-            background-color: white;
-            border: 2px solid #eef2f7;
-            padding: 10px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 15px;
-            color: var(--text);
-            font-weight: 600;
-            min-height: 65px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.1s, background-color 0.2s;
+        body { 
+            font-family: 'Inter', sans-serif; 
+            /* Mobilde kaydırmayı ve lastik efektini engelle */
+            overscroll-behavior-y: none;
             -webkit-tap-highlight-color: transparent;
         }
-
-        button.option-btn:active { transform: scale(0.96); }
-
-        button.option-btn.correct {
-            background-color: var(--success);
-            color: white;
-            border-color: var(--success);
+        /* Dinamik Viewport Yüksekliği (Adres çubuğu sorununu çözer) */
+        .min-h-dvh {
+            min-height: 100dvh;
         }
-
-        button.option-btn.wrong {
-            background-color: var(--error);
-            color: white;
-            border-color: var(--error);
-        }
-
-        .next-btn {
-            width: 100%;
-            padding: 15px;
-            background-color: var(--text);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
+        /* Kaydırma çubuğunu gizle ama kaydırmaya izin ver */
+        .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
-
-        /* Sonuç Ekranı */
-        #resultScreen {
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            flex: 1;
-        }
-
-        .restart-btn {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-
-        @media (max-width: 480px) {
-            .options-grid { grid-template-columns: 1fr; }
-            .container { padding: 15px; min-height: 95vh; }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
     </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 min-h-dvh flex flex-col items-center justify-center p-4 sm:p-6">
 
-<div class="container">
-    <div class="header-bar">
-        <h1>YDS Kelime Kampı</h1>
-        <div class="info-text">Tüm Kelimeler • Sınırsız Mod</div>
-    </div>
-
-    <div id="gameScreen">
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
+    <div class="w-full max-w-md mx-auto relative flex flex-col h-full justify-center">
+        
+        <!-- Üst Bar -->
+        <div class="flex justify-between items-center mb-4 sm:mb-6 px-1">
+            <div>
+                <h1 class="text-xl sm:text-2xl font-extrabold text-indigo-600 tracking-tight flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group"></i> YDS PRO
+                </h1>
+                <p class="text-[10px] sm:text-xs text-slate-400 font-semibold tracking-wide uppercase">Mobil Kelime Kampı</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="openUploadModal()" class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 text-indigo-600 active:scale-90 transition-transform duration-200" title="JSON İçe Aktar">
+                    <i class="fa-solid fa-file-import text-lg"></i>
+                </button>
+                <button onclick="resetAndStart()" class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 text-slate-600 active:scale-90 transition-transform duration-200" title="Yeniden Başlat">
+                    <i class="fa-solid fa-rotate-right text-lg"></i>
+                </button>
+            </div>
         </div>
 
-        <div class="score-board">
-            <span id="score">Puan: 0</span>
-            <span id="counter">Soru: 1 / --</span>
+        <!-- OYUN ALANI -->
+        <div id="gameScreen" class="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 overflow-hidden relative border border-slate-100 flex flex-col">
+            <!-- İlerleme Çubuğu -->
+            <div class="h-1.5 bg-slate-100 w-full">
+                <div id="progressFill" class="h-full bg-indigo-500 rounded-r-full transition-all duration-500 ease-out" style="width: 0%"></div>
+            </div>
+
+            <div class="p-5 sm:p-8 flex flex-col gap-4">
+                <!-- Skor Tablosu -->
+                <div class="flex justify-between items-center text-xs font-bold text-slate-400 bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-100">
+                    <span id="score" class="text-indigo-600 flex items-center gap-1.5"><i class="fa-solid fa-star text-yellow-400"></i> Puan: 0</span>
+                    <span id="counter" class="bg-white px-2 py-0.5 rounded shadow-sm border border-slate-100">1 / --</span>
+                </div>
+
+                <!-- Soru Kartı -->
+                <div class="bg-gradient-to-br from-indigo-600 to-violet-600 rounded-3xl p-6 text-center text-white relative shadow-lg shadow-indigo-200 flex flex-col items-center justify-center min-h-[200px] border border-white/10">
+                    <!-- Soru Tipi Badge -->
+                    <span id="qType" class="absolute top-5 bg-black/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase border border-white/10 shadow-sm">
+                        Soru Tipi
+                    </span>
+                    
+                    <!-- Kelime -->
+                    <div id="mainWord" class="text-3xl sm:text-4xl font-extrabold mt-6 mb-4 break-words leading-tight w-full drop-shadow-md">
+                        Loading...
+                    </div>
+
+                    <!-- Ses Butonu -->
+                    <button onclick="speakCurrentWord()" class="bg-white/10 hover:bg-white/20 active:bg-white/30 active:scale-95 text-white py-2.5 px-5 rounded-full transition-all flex items-center justify-center backdrop-blur-md border border-white/20 group touch-manipulation">
+                        <i class="fa-solid fa-volume-high text-sm group-hover:scale-110 transition-transform"></i>
+                        <span class="ml-2 text-xs font-bold uppercase tracking-wide opacity-90">Dinle</span>
+                    </button>
+                </div>
+
+                <!-- Şıklar -->
+                <div id="optionsArea" class="grid grid-cols-1 gap-3 mt-1">
+                    <!-- Javascript ile doldurulacak -->
+                </div>
+
+                <!-- Sonraki Butonu -->
+                <button id="nextBtn" onclick="nextQuestion()" class="hidden w-full bg-slate-800 text-white py-4 rounded-2xl font-bold hover:bg-slate-900 transition-all transform active:scale-95 shadow-xl shadow-slate-300/50 mt-2 flex items-center justify-center gap-2">
+                    Sonraki Soru <i class="fa-solid fa-arrow-right-long"></i>
+                </button>
+            </div>
         </div>
 
-        <div class="card-area">
-            <div class="question-badge" id="qType">SORU TİPİ</div>
-            <div class="word-display" id="mainWord">Hazırlanıyor...</div>
+        <!-- SONUÇ EKRANI -->
+        <div id="resultScreen" class="hidden bg-white rounded-[2rem] shadow-xl p-8 text-center border border-slate-100 flex-col items-center justify-center min-h-[400px]">
+            <div class="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mb-6 animate-bounce">
+                <i class="fa-solid fa-trophy text-4xl text-green-500"></i>
+            </div>
+            <h2 class="text-3xl font-black text-slate-800 mb-2">Tebrikler!</h2>
+            <p class="text-slate-500 mb-8 font-medium">Testi başarıyla tamamladın.</p>
+            
+            <div class="bg-slate-50 rounded-2xl p-6 mb-8 w-full border border-slate-100">
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Toplam Puan</p>
+                <div id="finalScore" class="text-5xl font-black text-indigo-600 mt-2 tracking-tight">0</div>
+            </div>
+
+            <button onclick="resetAndStart()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 active:scale-95 transition-all shadow-lg shadow-indigo-200">
+                Baştan Başla
+            </button>
         </div>
 
-        <div class="options-grid" id="optionsArea"></div>
-
-        <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Sonraki Soru</button>
     </div>
 
-    <div id="resultScreen">
-        <h2 style="font-size: 40px; margin:0;">🏁</h2>
-        <h2>Tüm Liste Bitti!</h2>
-        <p style="color:#7f8c8d;">Toplam Puanın:</p>
-        <div style="font-size:42px; font-weight:bold; color:var(--primary);" id="finalScore">0</div>
-        <button class="restart-btn" onclick="resetAndStart()">Baştan Başla</button>
+    <!-- MODAL: JSON Yükleme -->
+    <div id="uploadModal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center backdrop-blur-md p-4 animate-fade-in">
+        <div class="bg-white rounded-3xl w-full max-w-sm max-h-[85vh] flex flex-col shadow-2xl overflow-hidden ring-1 ring-black/5">
+            <!-- Modal Header -->
+            <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-white/50 backdrop-blur-sm sticky top-0 z-10">
+                <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"><i class="fa-solid fa-cloud-arrow-up text-sm"></i></div>
+                    Veri Yükle
+                </h3>
+                <button onclick="closeUploadModal()" class="w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-red-500 transition flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-5 overflow-y-auto no-scrollbar bg-slate-50/50">
+                <div class="space-y-4">
+                    
+                    <!-- Format Bilgisi -->
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider"><i class="fa-solid fa-code mr-1"></i> Format</span>
+                            <button onclick="copyFormatToClipboard(this)" class="text-[10px] bg-slate-50 border border-slate-200 px-2.5 py-1.5 rounded-lg text-indigo-600 font-bold active:bg-indigo-50 transition flex items-center">
+                                <i class="fa-regular fa-copy mr-1"></i> Kopyala
+                            </button>
+                        </div>
+                        <div class="relative group">
+                            <pre class="text-[11px] text-slate-600 font-mono bg-slate-50 p-3 rounded-xl border border-slate-100 overflow-x-auto whitespace-pre-wrap break-all select-all"><code>[{"en":"Word", "tr":"Anlam", "syn":"Eş Anlam"}]</code></pre>
+                        </div>
+                    </div>
+
+                    <!-- Dosya Seçimi -->
+                    <div class="relative active:scale-[0.99] transition-transform" onclick="document.getElementById('fileInput').click()">
+                        <div class="border-2 border-dashed border-indigo-200 bg-indigo-50/50 rounded-2xl p-6 text-center cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition-colors">
+                            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-indigo-500">
+                                <i class="fa-solid fa-folder-open text-xl"></i>
+                            </div>
+                            <p class="text-indigo-900 font-bold text-sm">JSON Dosyası Seç</p>
+                            <p class="text-[10px] text-slate-400 mt-1">Dosya yöneticisinden seçin</p>
+                        </div>
+                    </div>
+                    
+                    <input type="file" id="fileInput" accept=".json" class="hidden" onchange="handleFileSelect(this)">
+
+                    <div class="relative flex py-1 items-center">
+                        <div class="flex-grow border-t border-slate-200"></div>
+                        <span class="flex-shrink-0 mx-3 text-[10px] text-slate-400 font-bold uppercase">veya yapıştır</span>
+                        <div class="flex-grow border-t border-slate-200"></div>
+                    </div>
+
+                    <!-- Manuel Alan -->
+                    <div>
+                        <textarea id="jsonInputText" class="w-full h-32 p-4 text-sm border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono bg-white shadow-sm resize-none appearance-none" placeholder='Kodu buraya yapıştır...'></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-5 border-t border-slate-100 bg-white sticky bottom-0 z-10 flex gap-3">
+                 <button onclick="clearDatabase()" class="flex-1 bg-red-50 text-red-500 py-3.5 rounded-xl font-bold hover:bg-red-100 active:scale-95 transition text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-trash-can"></i> Sıfırla
+                </button>
+                <button onclick="processAndSaveJSON()" class="flex-[2] bg-indigo-600 text-white py-3.5 rounded-xl font-bold hover:bg-indigo-700 active:scale-95 transition shadow-lg shadow-indigo-200 text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-check-circle"></i> Yükle
+                </button>
+            </div>
+        </div>
     </div>
-</div>
 
 <script>
-    // --- TAM LİSTE (TABLO 1 ve TABLO 2'NİN TAMAMI) ---
-    const fullWordList = [
-        // TABLO 1: TEMEL SIFATLAR
-        { en: "Important", tr: "Önemli", syn: "Crucial, Critical, Vital, Significant" },
-        { en: "Crucial", tr: "Önemli", syn: "Important, Critical, Vital, Significant" },
-        { en: "Critical", tr: "Önemli", syn: "Important, Crucial, Vital, Significant" },
-        { en: "Vital", tr: "Önemli", syn: "Important, Crucial, Critical, Significant" },
-        { en: "Significant", tr: "Önemli", syn: "Important, Crucial, Critical, Vital" },
-        { en: "Central", tr: "Önemli (Merkezi)", syn: "Fundamental, Main, Important" },
-        { en: "Necessary", tr: "Gerekli", syn: "Needed, Required, Essential" },
-        { en: "Needed", tr: "Gerekli", syn: "Necessary, Required" },
-        { en: "Required", tr: "Gerekli", syn: "Necessary, Needed" },
-        { en: "Fundamental", tr: "Temel", syn: "Basic, Essential" },
-        { en: "Basic", tr: "Temel", syn: "Fundamental, Essential" },
-        { en: "Essential", tr: "Temel / Gerekli", syn: "Fundamental, Basic, Necessary" },
-        { en: "Mandatory", tr: "Zorunlu", syn: "Obligatory, Compulsory, Enforced" },
-        { en: "Obligatory", tr: "Zorunlu", syn: "Mandatory, Compulsory" },
-        { en: "Compulsory", tr: "Zorunlu", syn: "Mandatory, Obligatory" },
-        { en: "Enforced", tr: "Zorunlu (Dayatılmış)", syn: "Mandatory, Compulsory" },
-        { en: "Strange", tr: "Tuhaf / Garip", syn: "Weird, Odd, Bizarre, Peculiar" },
-        { en: "Weird", tr: "Tuhaf / Garip", syn: "Strange, Odd, Bizarre" },
-        { en: "Odd", tr: "Tuhaf / Garip", syn: "Strange, Weird, Peculiar" },
-        { en: "Bizarre", tr: "Tuhaf / Garip", syn: "Strange, Weird, Odd" },
-        { en: "Peculiar", tr: "Tuhaf / Garip", syn: "Strange, Odd, Weird" },
-        { en: "Ridiculous", tr: "Saçma", syn: "Absurd, Irrational, Silly" },
-        { en: "Absurd", tr: "Absürt / Saçma", syn: "Ridiculous, Irrational" },
-        { en: "Irrational", tr: "Mantıksız / Saçma", syn: "Illogical, Absurd" },
-        { en: "Silly", tr: "Aptalca / Saçma", syn: "Ridiculous, Foolish" },
-        { en: "Fantastic", tr: "Harika", syn: "Wonderful, Excellent, Superb" },
-        { en: "Wonderful", tr: "Harika", syn: "Fantastic, Excellent, Outstanding" },
-        { en: "Excellent", tr: "Mükemmel", syn: "Outstanding, Superb, Fantastic" },
-        { en: "Outstanding", tr: "Olağanüstü / Seçkin", syn: "Extraordinary, Excellent" },
-        { en: "Extraordinary", tr: "Olağanüstü", syn: "Outstanding, Exceptional" },
-        { en: "Superb", tr: "Mükemmel / Harika", syn: "Excellent, Fantastic" },
-        { en: "Abundant", tr: "Bol / Çok miktarda", syn: "Plentiful, Ample, Numerous" },
-        { en: "Numerous", tr: "Sayısız / Çok", syn: "Many, Abundant" },
-        { en: "Plentiful", tr: "Bol", syn: "Abundant, Ample" },
-        { en: "Ample", tr: "Bol / Yeterli", syn: "Abundant, Plentiful" },
-        { en: "Considerable", tr: "Önemli ölçüde / Epey", syn: "Substantial, Significant" },
-        { en: "Substantial", tr: "Önemli ölçüde / Büyük", syn: "Considerable, Large" },
-        { en: "Few", tr: "Az", syn: "Little, Meagre" },
-        { en: "Little", tr: "Az / Küçük", syn: "Few, Small" },
-        { en: "Meagre", tr: "Az / Yetersiz", syn: "Scant, Limited" },
-        { en: "Low", tr: "Düşük / Az", syn: "Small, Little" },
-        { en: "Scarce", tr: "Ender / Kıt", syn: "Rare, Insufficient" },
-        { en: "Rare", tr: "Nadir", syn: "Scarce, Uncommon" },
-        { en: "Inadequate", tr: "Yetersiz", syn: "Insufficient, Limited" },
-        { en: "Insufficient", tr: "Yetersiz", syn: "Inadequate, Short of" },
-        { en: "Limited", tr: "Sınırlı", syn: "Restricted, Confined" },
-        { en: "Restricted", tr: "Kısıtlı / Sınırlı", syn: "Limited, Constrained" },
-        { en: "Short of", tr: "Eksik", syn: "Lack of, Wanting" },
-        { en: "Lack of", tr: "Eksiklik / Yoksunluk", syn: "Shortage, Dearth" },
-        { en: "Tiny", tr: "Ufak / Minik", syn: "Minute, Small" },
-        { en: "Minute", tr: "Minik / Çok küçük", syn: "Tiny, Microscopic" },
-        { en: "Paltry", tr: "Önemsiz / Değersiz", syn: "Insignificant, Meagre" },
-        { en: "Insignificant", tr: "Önemsiz", syn: "Negligible, Unimportant" },
-        { en: "Negligible", tr: "İhmal edilebilir", syn: "Insignificant, Trivial" },
-        { en: "Brief", tr: "Kısa / Öz", syn: "Short, Concise" },
-        { en: "Short", tr: "Kısa", syn: "Brief, Concise" },
-        { en: "Concise", tr: "Kısa ve öz", syn: "Brief, Short" },
+    // --- FORMAT KOPYALAMA ---
+    function copyFormatToClipboard(btnElement) {
+        const formatText = '[{"en":"Word", "tr":"Anlam", "syn":"Eş Anlam"}]';
+        
+        const el = document.createElement('textarea');
+        el.value = formatText;
+        el.setAttribute('readonly', '');
+        el.style.position = 'absolute';
+        el.style.left = '-9999px';
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        
+        const originalContent = btnElement.innerHTML;
+        btnElement.innerHTML = '<i class="fa-solid fa-check mr-1"></i> OK';
+        btnElement.classList.add('bg-green-50', 'text-green-600', 'border-green-200');
+        
+        setTimeout(() => {
+            btnElement.innerHTML = originalContent;
+            btnElement.classList.remove('bg-green-50', 'text-green-600', 'border-green-200');
+        }, 2000);
+    }
 
-        // TABLO 2: TEMEL SIFATLAR (DEVAM)
-        { en: "Huge", tr: "Büyük / Devasa", syn: "Immense, Giant, Vast, Enormous" },
-        { en: "Immense", tr: "Muazzam", syn: "Huge, Enormous, Vast" },
-        { en: "Giant", tr: "Dev", syn: "Gigantic, Huge, Colossal" },
-        { en: "Gigantic", tr: "Devasa", syn: "Giant, Huge, Enormous" },
-        { en: "Vast", tr: "Geniş / Büyük", syn: "Huge, Immense, Extensive" },
-        { en: "Enormous", tr: "Kocaman", syn: "Huge, Immense, Giant" },
-        { en: "Profound", tr: "Derin (Etki/Anlam)", syn: "Deep, Intense" },
-        { en: "Deep", tr: "Derin", syn: "Profound, Bottomless" },
-        { en: "Separate", tr: "Ayrı", syn: "Distinct, Disconnected" },
-        { en: "Distinct", tr: "Belirgin / Ayrı", syn: "Separate, Different, Clear" },
-        { en: "Different", tr: "Farklı", syn: "Distinct, Dissimilar" },
-        { en: "Noticeable", tr: "Fark edilebilir", syn: "Distinct, Obvious, Visible" },
-        { en: "Divergent", tr: "Farklı / Ayrılan", syn: "Different, Deviating" },
-        { en: "Diverse", tr: "Çeşitli", syn: "Various, Varied" },
-        { en: "Various", tr: "Çeşitli", syn: "Diverse, Several" },
-        { en: "Several", tr: "Birkaç / Çeşitli", syn: "Various, Some" },
-        { en: "Evident", tr: "Açık / Belirgin", syn: "Clear, Apparent, Obvious" },
-        { en: "Clear", tr: "Net / Açık", syn: "Evident, Apparent, Obvious" },
-        { en: "Apparent", tr: "Aşikar / Görünür", syn: "Evident, Obvious, Clear" },
-        { en: "Obvious", tr: "Bariz / Ortada", syn: "Evident, Clear, Apparent" },
-        { en: "Shining", tr: "Parlayan", syn: "Luminous, Gleaming, Bright" },
-        { en: "Luminous", tr: "Işıklı / Parlak", syn: "Shining, Glowing" },
-        { en: "Gleaming", tr: "Parıltılı", syn: "Shining, Luminous" },
-        { en: "Lively", tr: "Canlı / Hayat dolu", syn: "Vibrant, Vivid, Energetic" },
-        { en: "Vibrant", tr: "Canlı / Titreşimli", syn: "Lively, Vivid" },
-        { en: "Vivid", tr: "Canlı (Renk/Anı)", syn: "Bright, Clear, Lively" },
-        { en: "Visible", tr: "Görülebilir", syn: "Noticeable, Observable" },
-        { en: "Observable", tr: "Gözlemlenebilir", syn: "Visible, Noticeable" },
-        { en: "Bright", tr: "Parlak", syn: "Shining, Luminous, Vivid" },
-        { en: "Invaluable", tr: "Paha biçilemez", syn: "Priceless, Precious" },
-        { en: "Valuable", tr: "Değerli", syn: "Precious, Worthwhile" },
-        { en: "Priceless", tr: "Paha biçilemez", syn: "Invaluable, Precious" },
-        { en: "Precious", tr: "Kıymetli", syn: "Valuable, Cherished" },
-        { en: "Bankrupt", tr: "İflas etmiş", syn: "Broke, Penniless, Insolvent" },
-        { en: "Broke", tr: "Parasız / Beş parasız", syn: "Penniless, Bankrupt" },
-        { en: "Penniless", tr: "Parasız", syn: "Broke, Destitute" },
-        { en: "Feasible", tr: "Yapılabilir", syn: "Viable, Practical, Possible" },
-        { en: "Viable", tr: "Uygulanabilir / Yaşayabilir", syn: "Feasible, Practical" },
-        { en: "Practical", tr: "Pratik / Kullanışlı", syn: "Feasible, Functional" },
-        { en: "Applicable", tr: "Uygulanabilir", syn: "Relevant, Suitable" },
-        { en: "Profitable", tr: "Karlı", syn: "Lucrative, Gainful" },
-        { en: "Lucrative", tr: "Kazançlı", syn: "Profitable, Gainful" },
-        { en: "Gainful", tr: "Kazançlı", syn: "Profitable, Paying" },
-        { en: "Innovative", tr: "Yenilikçi", syn: "Inventive, Creative" },
-        { en: "Inventive", tr: "Yaratıcı", syn: "Innovative, Creative" },
-        { en: "Pioneering", tr: "Öncü", syn: "Innovative, Leading" },
-        { en: "Competent", tr: "Yetkin", syn: "Qualified, Capable, Skilled" },
-        { en: "Qualified", tr: "Nitelikli", syn: "Competent, Certified" },
-        { en: "Capable of", tr: "Yetenekli / -e muktedir", syn: "Able to, Competent" },
-        { en: "Skilled", tr: "Becerikli", syn: "Expert, Proficient" },
-        { en: "Appropriate", tr: "Uygun", syn: "Suitable, Proper, Fit" },
-        { en: "Fit", tr: "Uygun / Zinde", syn: "Suitable, Appropriate" },
-        { en: "Proper", tr: "Düzgün / Uygun", syn: "Appropriate, Correct" },
-        { en: "Suitable", tr: "Elverişli / Uygun", syn: "Appropriate, Right" }
+    // --- SESLENDİRME (TTS) ---
+    function speakCurrentWord() {
+        if(!gameData.currentQuestion.word) return;
+        
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel(); 
+            const utterance = new SpeechSynthesisUtterance(gameData.currentQuestion.word);
+            utterance.lang = 'en-US'; 
+            utterance.rate = 0.8; 
+            window.speechSynthesis.speak(utterance);
+        } else {
+            alert("Cihazınız sesli okumayı desteklemiyor.");
+        }
+    }
+
+    // --- VERİTABANI YÖNETİMİ ---
+    const STORAGE_KEY = 'ydsKelimeleri_v2';
+    
+    // Varsayılan Liste
+    const defaultWords = [
+        { en: "Important", tr: "Önemli", syn: "Crucial, Critical" },
+        { en: "Necessary", tr: "Gerekli", syn: "Essential, Required" },
+        { en: "Abundant", tr: "Bol", syn: "Plentiful, Ample" },
+        { en: "Empty", tr: "Boş", syn: "Vacant, Void" },
+        { en: "Hazardous", tr: "Tehlikeli", syn: "Dangerous, Risky" }
     ];
 
+    let fullWordList = [];
+
+    function loadData() {
+        try {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if(stored) {
+                fullWordList = JSON.parse(stored);
+                if(!Array.isArray(fullWordList) || fullWordList.length === 0) {
+                   throw new Error("Geçersiz veri");
+                }
+            } else {
+                throw new Error("Veri yok");
+            }
+        } catch(e) {
+            console.log("Veri yüklenemedi, varsayılanlar kullanılıyor.");
+            fullWordList = [...defaultWords];
+            saveData();
+        }
+    }
+
+    function saveData() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(fullWordList));
+    }
+
+    function clearDatabase() {
+        if(confirm("Tüm liste silinecek ve varsayılanlara dönülecek. Onaylıyor musun?")) {
+            localStorage.removeItem(STORAGE_KEY);
+            document.getElementById('jsonInputText').value = "";
+            resetAndStart();
+            closeUploadModal();
+        }
+    }
+
+    // --- OYUN MANTIĞI ---
     let gameData = {
         questionOrder: [],
         currentIndex: 0,
@@ -364,51 +280,43 @@
         currentQuestion: {}
     };
 
-    // Oyunu başlatma ve sıfırlama
     function resetAndStart() {
-        // Skoru ve indeksi sıfırla
+        loadData();
         gameData.score = 0;
         gameData.currentIndex = 0;
         gameData.isActive = true;
         
-        // Rastgele sıralama oluştur (Shuffle)
-        // Listedeki TÜM kelimeler için bir indeks listesi oluşturur
         gameData.questionOrder = Array.from({length: fullWordList.length}, (_, i) => i);
         gameData.questionOrder.sort(() => Math.random() - 0.5);
 
-        // Ekranları ayarla
-        document.getElementById('resultScreen').style.display = 'none';
-        document.getElementById('gameScreen').style.display = 'flex'; // flex yapısı önemli
+        document.getElementById('resultScreen').classList.add('hidden');
+        document.getElementById('gameScreen').classList.remove('hidden');
+        document.getElementById('resultScreen').classList.remove('flex');
         
         updateUI();
         nextQuestion();
     }
 
     function updateUI() {
-        document.getElementById('score').innerText = `Puan: ${gameData.score}`;
-        // Kullanıcıya kaçıncı soruda olduğunu ve toplam soru sayısını göster
-        document.getElementById('counter').innerText = `Soru: ${gameData.currentIndex + 1} / ${fullWordList.length}`;
-        
+        document.getElementById('score').innerHTML = `<i class="fa-solid fa-star text-yellow-400"></i> Puan: ${gameData.score}`;
+        document.getElementById('counter').innerText = `${gameData.currentIndex + 1} / ${fullWordList.length}`;
         const percent = (gameData.currentIndex / fullWordList.length) * 100;
         document.getElementById('progressFill').style.width = `${percent}%`;
     }
 
     function nextQuestion() {
-        // Eğer tüm sorular bittiyse testi bitir
         if (gameData.currentIndex >= fullWordList.length) {
             finishGame();
             return;
         }
 
         gameData.isActive = true;
-        document.getElementById('nextBtn').style.display = 'none';
+        document.getElementById('nextBtn').classList.add('hidden');
         updateUI();
 
-        // Sıradaki kelimeyi al
         const listIndex = gameData.questionOrder[gameData.currentIndex];
         const wordObj = fullWordList[listIndex];
         
-        // Soru modu: %50 Türkçe, %50 Eş anlamlı (Eğer eş anlamlısı varsa)
         const hasSyn = wordObj.syn && wordObj.syn.length > 2;
         const mode = (Math.random() > 0.5 && hasSyn) ? 'syn' : 'tr';
         
@@ -418,16 +326,22 @@
             mode: mode
         };
 
-        // Görsel Ayarlar
-        document.getElementById('mainWord').innerText = gameData.currentQuestion.word;
-        const badge = document.getElementById('qType');
+        const mainWordEl = document.getElementById('mainWord');
+        const qTypeEl = document.getElementById('qType');
+        
+        mainWordEl.innerText = gameData.currentQuestion.word;
         
         if(mode === 'tr') {
-            badge.innerText = "Türkçe Anlamı Nedir?";
-            badge.style.backgroundColor = "#e67e22";
+            qTypeEl.innerText = "Türkçe Anlamı";
+            qTypeEl.className = "absolute top-5 bg-orange-500/20 text-orange-100 border border-orange-200/20 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase backdrop-blur-md shadow-sm";
+            mainWordEl.parentElement.classList.remove('from-purple-600', 'to-fuchsia-600');
+            mainWordEl.parentElement.classList.add('from-indigo-600', 'to-violet-600');
         } else {
-            badge.innerText = "Eş Anlamlısı Hangisidir?";
-            badge.style.backgroundColor = "#9b59b6";
+            qTypeEl.innerText = "Eş Anlamlısı";
+            qTypeEl.className = "absolute top-5 bg-fuchsia-500/20 text-fuchsia-100 border border-fuchsia-200/20 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase backdrop-blur-md shadow-sm";
+            // Renk temasını değiştirerek görsel ipucu ver
+            mainWordEl.parentElement.classList.remove('from-indigo-600', 'to-violet-600');
+            mainWordEl.parentElement.classList.add('from-purple-600', 'to-fuchsia-600');
         }
 
         generateOptions(wordObj, mode);
@@ -440,7 +354,6 @@
         let options = [];
         let correctText = "";
 
-        // Doğru cevabı belirle
         if (mode === 'syn') {
             const syns = correctObj.syn.split(',');
             correctText = syns[Math.floor(Math.random() * syns.length)].trim();
@@ -451,7 +364,6 @@
         gameData.currentQuestion.correctText = correctText;
         options.push(correctText);
 
-        // 3 tane yanlış şık bul
         let safetyCounter = 0;
         while(options.length < 4 && safetyCounter < 200) {
             safetyCounter++;
@@ -464,20 +376,18 @@
                 distractor = randomObj.syn ? randomObj.syn.split(',')[0].trim() : randomObj.en;
             }
 
-            // Çakışma kontrolü
             if(!options.includes(distractor) && distractor !== correctText) {
-                // Eş anlamlı modundaysak, yanlış şıkkın doğru kelimenin eş anlamlıları içinde olup olmadığına bak
                 if(mode === 'syn' && correctObj.syn.includes(distractor)) continue;
                 options.push(distractor);
             }
         }
 
-        // Şıkları karıştır
         options.sort(() => Math.random() - 0.5);
 
         options.forEach(opt => {
             const btn = document.createElement('button');
-            btn.className = 'option-btn';
+            // Mobilde daha kolay basılması için min-h-[72px] ve touch-manipulation
+            btn.className = "w-full min-h-[72px] bg-white border-2 border-slate-100 rounded-2xl p-2 text-slate-700 font-bold text-sm hover:bg-slate-50 hover:border-indigo-200 active:scale-[0.98] transition-all flex items-center justify-center text-center shadow-sm touch-manipulation leading-tight select-none";
             btn.innerText = opt;
             btn.onclick = () => checkAnswer(btn, opt);
             area.appendChild(btn);
@@ -489,31 +399,92 @@
         gameData.isActive = false;
 
         const isCorrect = answer === gameData.currentQuestion.correctText;
-        const allBtns = document.querySelectorAll('.option-btn');
+        const allBtns = document.querySelectorAll('#optionsArea button');
 
         if (isCorrect) {
-            btn.classList.add('correct');
+            btn.className = "w-full min-h-[72px] bg-green-500 border-2 border-green-600 rounded-2xl p-2 text-white font-bold text-sm flex items-center justify-center text-center shadow-md transform scale-[1.02] transition-all";
             gameData.score += 10;
         } else {
-            btn.classList.add('wrong');
+            btn.className = "w-full min-h-[72px] bg-red-100 border-2 border-red-200 rounded-2xl p-2 text-red-600 font-bold text-sm flex items-center justify-center text-center opacity-80";
             // Doğruyu göster
             allBtns.forEach(b => {
-                if(b.innerText === gameData.currentQuestion.correctText) b.classList.add('correct');
+                if(b.innerText === gameData.currentQuestion.correctText) {
+                    b.className = "w-full min-h-[72px] bg-green-500 border-2 border-green-600 rounded-2xl p-2 text-white font-bold text-sm flex items-center justify-center text-center shadow-md";
+                }
             });
         }
 
-        gameData.currentIndex++; // İndeksi bir artır
-        document.getElementById('score').innerText = `Puan: ${gameData.score}`;
-        document.getElementById('nextBtn').style.display = 'block';
+        gameData.currentIndex++;
+        document.getElementById('score').innerHTML = `<i class="fa-solid fa-star text-yellow-400"></i> Puan: ${gameData.score}`;
+        document.getElementById('nextBtn').classList.remove('hidden');
     }
 
     function finishGame() {
-        document.getElementById('gameScreen').style.display = 'none';
-        document.getElementById('resultScreen').style.display = 'flex';
+        document.getElementById('gameScreen').classList.add('hidden');
+        document.getElementById('resultScreen').classList.remove('hidden');
+        document.getElementById('resultScreen').classList.add('flex');
         document.getElementById('finalScore').innerText = gameData.score;
     }
 
-    // Başlat
+    // --- JSON YÜKLEME İŞLEMLERİ ---
+
+    function openUploadModal() {
+        document.getElementById('uploadModal').classList.remove('hidden');
+        document.getElementById('fileInput').value = ""; 
+        document.getElementById('jsonInputText').value = "";
+    }
+
+    function closeUploadModal() {
+        document.getElementById('uploadModal').classList.add('hidden');
+    }
+
+    function handleFileSelect(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                document.getElementById('jsonInputText').value = e.target.result;
+            };
+            
+            reader.readAsText(file);
+        }
+    }
+
+    function processAndSaveJSON() {
+        const rawText = document.getElementById('jsonInputText').value.trim();
+        
+        if (!rawText) {
+            alert("Lütfen JSON dosyası seçin veya kod yapıştırın.");
+            return;
+        }
+
+        try {
+            const jsonData = JSON.parse(rawText);
+            
+            if (!Array.isArray(jsonData)) {
+                alert("Format Hatası: Veri köşeli parantez [] ile başlamalı.");
+                return;
+            }
+
+            if (jsonData.length > 0 && (!jsonData[0].en || !jsonData[0].tr)) {
+                alert("Veri Hatası: Her kelimede 'en' ve 'tr' alanları zorunludur.");
+                return;
+            }
+
+            fullWordList = fullWordList.concat(jsonData);
+            saveData();
+            
+            alert(`${jsonData.length} kelime başarıyla eklendi!`);
+            closeUploadModal();
+            resetAndStart();
+
+        } catch (e) {
+            alert("Hatalı Format: Lütfen JSON kodunu kontrol edin.");
+        }
+    }
+
+    // Uygulamayı Başlat
     resetAndStart();
 
 </script>
