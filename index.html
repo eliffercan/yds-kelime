@@ -3,440 +3,656 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YDS Pro - Kelime Avcısı</title>
-    <!-- Tailwind CSS -->
+    <title>YDS Pro Ultimate</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
-            /* Mobilde kaydırmayı ve lastik efektini engelle */
             overscroll-behavior-y: none;
             -webkit-tap-highlight-color: transparent;
         }
-        /* Dinamik Viewport Yüksekliği (Adres çubuğu sorununu çözer) */
-        .min-h-dvh {
-            min-height: 100dvh;
-        }
-        /* Kaydırma çubuğunu gizle ama kaydırmaya izin ver */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        .min-h-dvh { min-height: 100dvh; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Animasyonlar */
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        .animate-fade-in { animation: fade-in 0.2s ease-out; }
+        
+        .card-flip { transition: transform 0.6s; transform-style: preserve-3d; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-dvh flex flex-col items-center justify-center p-4 sm:p-6">
+<body class="bg-slate-50 text-slate-800 min-h-dvh flex flex-col items-center justify-center p-4">
 
     <div class="w-full max-w-md mx-auto relative flex flex-col h-full justify-center">
         
-        <!-- Üst Bar -->
-        <div class="flex justify-between items-center mb-4 sm:mb-6 px-1">
-            <div>
-                <h1 class="text-xl sm:text-2xl font-extrabold text-indigo-600 tracking-tight flex items-center gap-2">
+        <!-- ÜST BAR -->
+        <div class="flex justify-between items-center mb-4 px-1">
+            <div onclick="openMenuModal()" class="cursor-pointer">
+                <h1 class="text-xl font-black text-indigo-600 tracking-tight flex items-center gap-2">
                     <i class="fa-solid fa-layer-group"></i> YDS PRO
+                    <span id="modeBadge" class="hidden text-[10px] bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full uppercase tracking-wide">Normal</span>
                 </h1>
-                <p class="text-[10px] sm:text-xs text-slate-400 font-semibold tracking-wide uppercase">Mobil Kelime Kampı</p>
             </div>
             <div class="flex gap-2">
-                <button onclick="openUploadModal()" class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 text-indigo-600 active:scale-90 transition-transform duration-200" title="JSON İçe Aktar">
-                    <i class="fa-solid fa-file-import text-lg"></i>
+                <button onclick="toggleFavorite()" id="favBtnMain" class="hidden bg-white w-10 h-10 rounded-2xl shadow-sm border border-slate-100 text-slate-300 active:scale-90 transition-transform duration-200 flex items-center justify-center">
+                    <i class="fa-solid fa-heart text-lg"></i>
                 </button>
-                <button onclick="resetAndStart()" class="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 text-slate-600 active:scale-90 transition-transform duration-200" title="Yeniden Başlat">
-                    <i class="fa-solid fa-rotate-right text-lg"></i>
+                <button onclick="openMenuModal()" class="bg-white w-10 h-10 rounded-2xl shadow-sm border border-slate-100 text-slate-600 active:scale-90 transition-transform duration-200 flex items-center justify-center relative">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                    <span id="errorCountBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
                 </button>
             </div>
         </div>
 
         <!-- OYUN ALANI -->
         <div id="gameScreen" class="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 overflow-hidden relative border border-slate-100 flex flex-col">
-            <!-- İlerleme Çubuğu -->
-            <div class="h-1.5 bg-slate-100 w-full">
+            
+            <!-- Süre Çubuğu (Timer) -->
+            <div id="timerContainer" class="h-1 bg-slate-100 w-full hidden">
+                <div id="timerFill" class="h-full bg-orange-500 rounded-r-full transition-all duration-1000 linear" style="width: 100%"></div>
+            </div>
+
+            <!-- Genel İlerleme -->
+            <div class="h-1 bg-slate-50 w-full">
                 <div id="progressFill" class="h-full bg-indigo-500 rounded-r-full transition-all duration-500 ease-out" style="width: 0%"></div>
             </div>
 
-            <div class="p-5 sm:p-8 flex flex-col gap-4">
-                <!-- Skor Tablosu -->
+            <div class="p-5 flex flex-col gap-4">
+                <!-- Skor ve İstatistik -->
                 <div class="flex justify-between items-center text-xs font-bold text-slate-400 bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-100">
-                    <span id="score" class="text-indigo-600 flex items-center gap-1.5"><i class="fa-solid fa-star text-yellow-400"></i> Puan: 0</span>
+                    <span id="score" class="text-indigo-600 flex items-center gap-1.5"><i class="fa-solid fa-star text-yellow-400"></i> 0</span>
+                    <span id="streak" class="text-orange-500 flex items-center gap-1.5 hidden"><i class="fa-solid fa-fire"></i> 0</span>
                     <span id="counter" class="bg-white px-2 py-0.5 rounded shadow-sm border border-slate-100">1 / --</span>
                 </div>
 
-                <!-- Soru Kartı -->
-                <div class="bg-gradient-to-br from-indigo-600 to-violet-600 rounded-3xl p-6 text-center text-white relative shadow-lg shadow-indigo-200 flex flex-col items-center justify-center min-h-[200px] border border-white/10">
+                <!-- SORU KARTI -->
+                <div class="bg-gradient-to-br from-indigo-600 to-violet-600 rounded-3xl p-6 text-center text-white relative shadow-lg shadow-indigo-200 flex flex-col items-center justify-center min-h-[200px] border border-white/10 overflow-hidden">
+                    
+                    <!-- Background Pattern -->
+                    <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(circle, #ffffff 1px, transparent 1px); background-size: 20px 20px;"></div>
+
                     <!-- Soru Tipi Badge -->
-                    <span id="qType" class="absolute top-5 bg-black/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase border border-white/10 shadow-sm">
+                    <span id="qType" class="absolute top-4 bg-black/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase border border-white/10 shadow-sm z-10">
                         Soru Tipi
                     </span>
                     
-                    <!-- Kelime -->
-                    <div id="mainWord" class="text-3xl sm:text-4xl font-extrabold mt-6 mb-4 break-words leading-tight w-full drop-shadow-md">
+                    <!-- KELİME -->
+                    <div id="mainWord" class="relative z-10 text-3xl sm:text-4xl font-extrabold mt-6 mb-4 break-words leading-tight w-full drop-shadow-md">
                         Loading...
                     </div>
 
                     <!-- Ses Butonu -->
-                    <button onclick="speakCurrentWord()" class="bg-white/10 hover:bg-white/20 active:bg-white/30 active:scale-95 text-white py-2.5 px-5 rounded-full transition-all flex items-center justify-center backdrop-blur-md border border-white/20 group touch-manipulation">
+                    <button onclick="speakCurrentWord()" class="relative z-10 bg-white/10 hover:bg-white/20 active:bg-white/30 active:scale-95 text-white py-2 px-4 rounded-full transition-all flex items-center justify-center backdrop-blur-md border border-white/20 group touch-manipulation">
                         <i class="fa-solid fa-volume-high text-sm group-hover:scale-110 transition-transform"></i>
-                        <span class="ml-2 text-xs font-bold uppercase tracking-wide opacity-90">Dinle</span>
+                        <span class="ml-2 text-[10px] font-bold uppercase tracking-wide opacity-90">Dinle</span>
                     </button>
                 </div>
 
-                <!-- Şıklar -->
-                <div id="optionsArea" class="grid grid-cols-1 gap-3 mt-1">
-                    <!-- Javascript ile doldurulacak -->
+                <!-- ŞIKLAR -->
+                <div id="optionsArea" class="grid grid-cols-1 gap-2.5 mt-1"></div>
+
+                <!-- Örnek Cümle Alanı (Cevap sonrası açılır) -->
+                <div id="exampleArea" class="hidden bg-indigo-50 border border-indigo-100 rounded-xl p-4 text-sm mt-2 animate-fade-in">
+                    <p class="text-indigo-900 font-semibold mb-1"><i class="fa-solid fa-quote-left mr-2 opacity-50"></i>Örnek:</p>
+                    <p id="exampleText" class="text-slate-600 italic">Example sentence goes here.</p>
                 </div>
 
                 <!-- Sonraki Butonu -->
-                <button id="nextBtn" onclick="nextQuestion()" class="hidden w-full bg-slate-800 text-white py-4 rounded-2xl font-bold hover:bg-slate-900 transition-all transform active:scale-95 shadow-xl shadow-slate-300/50 mt-2 flex items-center justify-center gap-2">
+                <button id="nextBtn" onclick="nextQuestion()" class="hidden w-full bg-slate-800 text-white py-3.5 rounded-2xl font-bold hover:bg-slate-900 transition-all transform active:scale-95 shadow-xl shadow-slate-300/50 mt-2 flex items-center justify-center gap-2">
                     Sonraki Soru <i class="fa-solid fa-arrow-right-long"></i>
                 </button>
             </div>
         </div>
 
+        <!-- MENÜ / AYARLAR MODALI -->
+        <div id="menuModal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-end sm:items-center justify-center backdrop-blur-sm animate-fade-in p-0 sm:p-4">
+            <div class="bg-white w-full max-w-sm rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+                <!-- Header -->
+                <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/80 backdrop-blur-xl">
+                    <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-bars text-indigo-500"></i> Menü
+                    </h3>
+                    <button onclick="closeMenuModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-red-500 flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <!-- Body -->
+                <div class="p-5 overflow-y-auto space-y-6">
+                    
+                    <!-- Oyun Modları -->
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Çalışma Modları</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button onclick="startGameMode('normal')" class="bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 p-4 rounded-2xl text-left transition group">
+                                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-indigo-500 shadow-sm mb-3 group-hover:scale-110 transition"><i class="fa-solid fa-play"></i></div>
+                                <div class="font-bold text-indigo-900">Tüm Liste</div>
+                                <div class="text-xs text-indigo-400 mt-0.5"><span id="menuTotalCount">0</span> Kelime</div>
+                            </button>
+                            
+                            <button onclick="startGameMode('wrong')" class="bg-red-50 hover:bg-red-100 border border-red-100 p-4 rounded-2xl text-left transition group relative overflow-hidden">
+                                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-red-500 shadow-sm mb-3 group-hover:scale-110 transition"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                                <div class="font-bold text-red-900">Hatalarım</div>
+                                <div class="text-xs text-red-400 mt-0.5"><span id="menuWrongCount">0</span> Kelime</div>
+                            </button>
+
+                            <button onclick="startGameMode('favorites')" class="bg-pink-50 hover:bg-pink-100 border border-pink-100 p-4 rounded-2xl text-left transition group">
+                                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-pink-500 shadow-sm mb-3 group-hover:scale-110 transition"><i class="fa-solid fa-heart"></i></div>
+                                <div class="font-bold text-pink-900">Favoriler</div>
+                                <div class="text-xs text-pink-400 mt-0.5"><span id="menuFavCount">0</span> Kelime</div>
+                            </button>
+                             
+                             <!-- Dosya Yükle -->
+                            <button onclick="openUploadModal()" class="bg-slate-50 hover:bg-slate-100 border border-slate-100 p-4 rounded-2xl text-left transition group">
+                                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-slate-500 shadow-sm mb-3 group-hover:scale-110 transition"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                                <div class="font-bold text-slate-700">Veri Yükle</div>
+                                <div class="text-xs text-slate-400 mt-0.5">JSON Ekle</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Ayarlar -->
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Ayarlar</p>
+                        <div class="space-y-3">
+                            <!-- Timer Toggle -->
+                            <div class="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-500 flex items-center justify-center"><i class="fa-solid fa-stopwatch"></i></div>
+                                    <div class="text-sm font-bold text-slate-700">Zamanlayıcı (10sn)</div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="timerToggle" class="sr-only peer" onchange="toggleSetting('timer')">
+                                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                </label>
+                            </div>
+
+                            <!-- Inverse Mode Toggle -->
+                            <div class="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-500 flex items-center justify-center"><i class="fa-solid fa-right-left"></i></div>
+                                    <div class="text-sm font-bold text-slate-700">Ters Mod (TR -> EN)</div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="inverseToggle" class="sr-only peer" onchange="toggleSetting('inverse')">
+                                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Uygulama Rehberi (Yeni Eklendi) -->
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Nasıl Çalışır?</p>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs space-y-3 text-slate-600">
+                            <div class="flex gap-3 items-start">
+                                <div class="w-6 h-6 shrink-0 bg-white rounded-lg flex items-center justify-center text-indigo-500 shadow-sm mt-0.5"><i class="fa-solid fa-play"></i></div>
+                                <div><span class="font-bold text-slate-800">Normal Mod:</span> Tüm kelimelerle karışık alıştırma yaparsın.</div>
+                            </div>
+                            <div class="flex gap-3 items-start">
+                                <div class="w-6 h-6 shrink-0 bg-white rounded-lg flex items-center justify-center text-red-500 shadow-sm mt-0.5"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                                <div><span class="font-bold text-slate-800">Hatalarım:</span> Yanlış bildiğin kelimeleri tekrar sorar. Doğru bilince listeden düşer.</div>
+                            </div>
+                            <div class="flex gap-3 items-start">
+                                <div class="w-6 h-6 shrink-0 bg-white rounded-lg flex items-center justify-center text-pink-500 shadow-sm mt-0.5"><i class="fa-solid fa-heart"></i></div>
+                                <div><span class="font-bold text-slate-800">Favoriler:</span> Soru ekranında kalp ikonuna basarak eklediğin özel kelimeler.</div>
+                            </div>
+                             <div class="flex gap-3 items-start">
+                                <div class="w-6 h-6 shrink-0 bg-white rounded-lg flex items-center justify-center text-blue-500 shadow-sm mt-0.5"><i class="fa-solid fa-right-left"></i></div>
+                                <div><span class="font-bold text-slate-800">Ters Mod:</span> Türkçe kelimeyi gösterip İngilizcesini bulmanı ister.</div>
+                            </div>
+                            <div class="flex gap-3 items-start">
+                                <div class="w-6 h-6 shrink-0 bg-white rounded-lg flex items-center justify-center text-slate-500 shadow-sm mt-0.5"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                                <div><span class="font-bold text-slate-800">Veri Yükle:</span> Kendi listeni JSON olarak yükleyebilirsin.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Veri Yönetimi -->
+                    <div>
+                         <button onclick="exportData()" class="w-full bg-slate-800 text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 mb-2">
+                             <i class="fa-solid fa-download"></i> Verileri Yedekle (İndir)
+                         </button>
+                         <div class="text-center text-[10px] text-slate-400">YDS Pro v3.1</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- UPLOAD MODAL (Gizli) -->
+        <div id="uploadModal" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center backdrop-blur-md p-4">
+             <div class="bg-white rounded-3xl w-full max-w-sm max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+                <div class="p-4 border-b flex justify-between items-center">
+                    <h3 class="font-bold">JSON Yükle</h3>
+                    <button onclick="document.getElementById('uploadModal').classList.add('hidden')" class="text-red-500"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="p-4 overflow-y-auto space-y-4">
+                     <div class="bg-indigo-50 p-3 rounded-lg text-xs">
+                         <b>Format:</b> <code class="select-all">[{"en":"Word", "tr":"Anlam", "syn":"Eş Anlam", "ex":"Example sentence."}]</code>
+                     </div>
+                     <input type="file" id="fileInput" accept=".json" onchange="handleFileSelect(this)" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
+                     <textarea id="jsonInputText" class="w-full h-32 p-3 border rounded-xl text-xs font-mono" placeholder="Kodu yapıştır..."></textarea>
+                     <button onclick="processAndSaveJSON()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold">Yükle</button>
+                     <button onclick="clearDatabase()" class="w-full text-red-500 text-xs mt-2">Verileri Sıfırla</button>
+                </div>
+             </div>
+        </div>
+
         <!-- SONUÇ EKRANI -->
         <div id="resultScreen" class="hidden bg-white rounded-[2rem] shadow-xl p-8 text-center border border-slate-100 flex-col items-center justify-center min-h-[400px]">
-            <div class="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mb-6 animate-bounce">
-                <i class="fa-solid fa-trophy text-4xl text-green-500"></i>
-            </div>
-            <h2 class="text-3xl font-black text-slate-800 mb-2">Tebrikler!</h2>
-            <p class="text-slate-500 mb-8 font-medium">Testi başarıyla tamamladın.</p>
+            <h2 class="text-3xl font-black text-slate-800 mb-2">Bitti!</h2>
+            <div class="text-5xl font-black text-indigo-600 mb-4" id="finalScore">0</div>
+            <p class="text-slate-500 mb-6 text-sm">Oturum İstatistikleri</p>
             
-            <div class="bg-slate-50 rounded-2xl p-6 mb-8 w-full border border-slate-100">
-                <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Toplam Puan</p>
-                <div id="finalScore" class="text-5xl font-black text-indigo-600 mt-2 tracking-tight">0</div>
+            <div class="grid grid-cols-2 gap-3 w-full mb-6">
+                <div class="bg-slate-50 p-3 rounded-xl">
+                    <div class="text-xs text-slate-400 font-bold uppercase">Doğru</div>
+                    <div class="text-xl font-bold text-green-500" id="resCorrect">0</div>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-xl">
+                    <div class="text-xs text-slate-400 font-bold uppercase">Yanlış</div>
+                    <div class="text-xl font-bold text-red-500" id="resWrong">0</div>
+                </div>
             </div>
 
-            <button onclick="resetAndStart()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 active:scale-95 transition-all shadow-lg shadow-indigo-200">
-                Baştan Başla
+            <button onclick="openMenuModal()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 transition">
+                Menüye Dön
             </button>
         </div>
 
     </div>
 
-    <!-- MODAL: JSON Yükleme -->
-    <div id="uploadModal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center backdrop-blur-md p-4 animate-fade-in">
-        <div class="bg-white rounded-3xl w-full max-w-sm max-h-[85vh] flex flex-col shadow-2xl overflow-hidden ring-1 ring-black/5">
-            <!-- Modal Header -->
-            <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-white/50 backdrop-blur-sm sticky top-0 z-10">
-                <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"><i class="fa-solid fa-cloud-arrow-up text-sm"></i></div>
-                    Veri Yükle
-                </h3>
-                <button onclick="closeUploadModal()" class="w-8 h-8 rounded-full bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-red-500 transition flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="p-5 overflow-y-auto no-scrollbar bg-slate-50/50">
-                <div class="space-y-4">
-                    
-                    <!-- Format Bilgisi -->
-                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider"><i class="fa-solid fa-code mr-1"></i> Format</span>
-                            <button onclick="copyFormatToClipboard(this)" class="text-[10px] bg-slate-50 border border-slate-200 px-2.5 py-1.5 rounded-lg text-indigo-600 font-bold active:bg-indigo-50 transition flex items-center">
-                                <i class="fa-regular fa-copy mr-1"></i> Kopyala
-                            </button>
-                        </div>
-                        <div class="relative group">
-                            <pre class="text-[11px] text-slate-600 font-mono bg-slate-50 p-3 rounded-xl border border-slate-100 overflow-x-auto whitespace-pre-wrap break-all select-all"><code>[{"en":"Word", "tr":"Anlam", "syn":"Eş Anlam"}]</code></pre>
-                        </div>
-                    </div>
-
-                    <!-- Dosya Seçimi -->
-                    <div class="relative active:scale-[0.99] transition-transform" onclick="document.getElementById('fileInput').click()">
-                        <div class="border-2 border-dashed border-indigo-200 bg-indigo-50/50 rounded-2xl p-6 text-center cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition-colors">
-                            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-indigo-500">
-                                <i class="fa-solid fa-folder-open text-xl"></i>
-                            </div>
-                            <p class="text-indigo-900 font-bold text-sm">JSON Dosyası Seç</p>
-                            <p class="text-[10px] text-slate-400 mt-1">Dosya yöneticisinden seçin</p>
-                        </div>
-                    </div>
-                    
-                    <input type="file" id="fileInput" accept=".json" class="hidden" onchange="handleFileSelect(this)">
-
-                    <div class="relative flex py-1 items-center">
-                        <div class="flex-grow border-t border-slate-200"></div>
-                        <span class="flex-shrink-0 mx-3 text-[10px] text-slate-400 font-bold uppercase">veya yapıştır</span>
-                        <div class="flex-grow border-t border-slate-200"></div>
-                    </div>
-
-                    <!-- Manuel Alan -->
-                    <div>
-                        <textarea id="jsonInputText" class="w-full h-32 p-4 text-sm border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-mono bg-white shadow-sm resize-none appearance-none" placeholder='Kodu buraya yapıştır...'></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="p-5 border-t border-slate-100 bg-white sticky bottom-0 z-10 flex gap-3">
-                 <button onclick="clearDatabase()" class="flex-1 bg-red-50 text-red-500 py-3.5 rounded-xl font-bold hover:bg-red-100 active:scale-95 transition text-sm flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-trash-can"></i> Sıfırla
-                </button>
-                <button onclick="processAndSaveJSON()" class="flex-[2] bg-indigo-600 text-white py-3.5 rounded-xl font-bold hover:bg-indigo-700 active:scale-95 transition shadow-lg shadow-indigo-200 text-sm flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-check-circle"></i> Yükle
-                </button>
-            </div>
-        </div>
-    </div>
-
 <script>
-    // --- FORMAT KOPYALAMA ---
-    function copyFormatToClipboard(btnElement) {
-        const formatText = '[{"en":"Word", "tr":"Anlam", "syn":"Eş Anlam"}]';
-        
-        const el = document.createElement('textarea');
-        el.value = formatText;
-        el.setAttribute('readonly', '');
-        el.style.position = 'absolute';
-        el.style.left = '-9999px';
-        document.body.appendChild(el);
-        el.select();
-        document.execCommand('copy');
-        document.body.removeChild(el);
-        
-        const originalContent = btnElement.innerHTML;
-        btnElement.innerHTML = '<i class="fa-solid fa-check mr-1"></i> OK';
-        btnElement.classList.add('bg-green-50', 'text-green-600', 'border-green-200');
-        
-        setTimeout(() => {
-            btnElement.innerHTML = originalContent;
-            btnElement.classList.remove('bg-green-50', 'text-green-600', 'border-green-200');
-        }, 2000);
-    }
-
-    // --- SESLENDİRME (TTS) ---
-    function speakCurrentWord() {
-        if(!gameData.currentQuestion.word) return;
-        
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel(); 
-            const utterance = new SpeechSynthesisUtterance(gameData.currentQuestion.word);
-            utterance.lang = 'en-US'; 
-            utterance.rate = 0.8; 
-            window.speechSynthesis.speak(utterance);
-        } else {
-            alert("Cihazınız sesli okumayı desteklemiyor.");
-        }
-    }
-
-    // --- VERİTABANI YÖNETİMİ ---
-    const STORAGE_KEY = 'ydsKelimeleri_v2';
+    // --- VERİTABANI VE AYARLAR ---
+    const STORAGE_KEY = 'yds_data_v3';
     
-    // Varsayılan Liste
-    const defaultWords = [
-        { en: "Important", tr: "Önemli", syn: "Crucial, Critical" },
-        { en: "Necessary", tr: "Gerekli", syn: "Essential, Required" },
-        { en: "Abundant", tr: "Bol", syn: "Plentiful, Ample" },
-        { en: "Empty", tr: "Boş", syn: "Vacant, Void" },
-        { en: "Hazardous", tr: "Tehlikeli", syn: "Dangerous, Risky" }
-    ];
+    const defaultData = {
+        words: [
+            { en: "Important", tr: "Önemli", syn: "Crucial, Critical", ex: "It is important to study." },
+            { en: "Necessary", tr: "Gerekli", syn: "Essential", ex: "Water is necessary for life." },
+            { en: "Abundant", tr: "Bol", syn: "Plentiful", ex: "We have abundant resources." }
+        ],
+        wrongIndices: [], // Yanlış yapılan kelimelerin indeksleri
+        favIndices: [],   // Favori kelimelerin indeksleri
+        settings: {
+            timer: false,
+            inverse: false // false: EN->TR, true: TR->EN
+        },
+        stats: {
+            totalQuestions: 0,
+            totalCorrect: 0,
+            streak: 0
+        }
+    };
 
-    let fullWordList = [];
+    let appData = JSON.parse(JSON.stringify(defaultData)); // Deep copy
+    let gameSession = {
+        active: false,
+        queue: [], // Soru sırası (indeksler)
+        currentIndex: 0,
+        score: 0,
+        sessionCorrect: 0,
+        sessionWrong: 0,
+        currentQ: {},
+        timerInterval: null
+    };
 
+    // --- TEMEL FONKSİYONLAR ---
     function loadData() {
         try {
             const stored = localStorage.getItem(STORAGE_KEY);
             if(stored) {
-                fullWordList = JSON.parse(stored);
-                if(!Array.isArray(fullWordList) || fullWordList.length === 0) {
-                   throw new Error("Geçersiz veri");
-                }
+                const parsed = JSON.parse(stored);
+                // Eski versiyon uyumluluğu için merge
+                appData = { ...defaultData, ...parsed, settings: { ...defaultData.settings, ...parsed.settings }, stats: { ...defaultData.stats, ...parsed.stats } };
             } else {
-                throw new Error("Veri yok");
+                saveData();
             }
-        } catch(e) {
-            console.log("Veri yüklenemedi, varsayılanlar kullanılıyor.");
-            fullWordList = [...defaultWords];
-            saveData();
-        }
+        } catch(e) { console.error("Load error", e); }
+        updateMenuBadges();
+        updateSettingsUI();
     }
 
     function saveData() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(fullWordList));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        updateMenuBadges();
     }
 
-    function clearDatabase() {
-        if(confirm("Tüm liste silinecek ve varsayılanlara dönülecek. Onaylıyor musun?")) {
-            localStorage.removeItem(STORAGE_KEY);
-            document.getElementById('jsonInputText').value = "";
-            resetAndStart();
-            closeUploadModal();
+    function updateMenuBadges() {
+        document.getElementById('menuTotalCount').innerText = appData.words.length;
+        document.getElementById('menuWrongCount').innerText = appData.wrongIndices.length;
+        document.getElementById('menuFavCount').innerText = appData.favIndices.length;
+        
+        const errBadge = document.getElementById('errorCountBadge');
+        if(appData.wrongIndices.length > 0) {
+            errBadge.innerText = appData.wrongIndices.length;
+            errBadge.classList.remove('hidden');
+        } else {
+            errBadge.classList.add('hidden');
         }
     }
 
-    // --- OYUN MANTIĞI ---
-    let gameData = {
-        questionOrder: [],
-        currentIndex: 0,
-        score: 0,
-        isActive: true,
-        currentQuestion: {}
-    };
+    function updateSettingsUI() {
+        document.getElementById('timerToggle').checked = appData.settings.timer;
+        document.getElementById('inverseToggle').checked = appData.settings.inverse;
+    }
 
-    function resetAndStart() {
-        loadData();
-        gameData.score = 0;
-        gameData.currentIndex = 0;
-        gameData.isActive = true;
+    function toggleSetting(key) {
+        appData.settings[key] = !appData.settings[key];
+        saveData();
+    }
+
+    // --- OYUN MODLARI ---
+    function openMenuModal() {
+        if(gameSession.active) {
+            // Oyunu duraklatabiliriz ama şimdilik devam etsin
+        }
+        document.getElementById('menuModal').classList.remove('hidden');
+    }
+
+    function closeMenuModal() {
+        document.getElementById('menuModal').classList.add('hidden');
+    }
+
+    function startGameMode(mode) {
+        let indices = [];
         
-        gameData.questionOrder = Array.from({length: fullWordList.length}, (_, i) => i);
-        gameData.questionOrder.sort(() => Math.random() - 0.5);
+        if (mode === 'normal') {
+            indices = appData.words.map((_, i) => i);
+            document.getElementById('modeBadge').innerText = "Normal";
+        } else if (mode === 'wrong') {
+            if(appData.wrongIndices.length === 0) return alert("Henüz hatalı kelimen yok! Harikasın.");
+            indices = [...appData.wrongIndices];
+            document.getElementById('modeBadge').innerText = "Hatalar";
+        } else if (mode === 'favorites') {
+            if(appData.favIndices.length === 0) return alert("Henüz favori eklemedin.");
+            indices = [...appData.favIndices];
+            document.getElementById('modeBadge').innerText = "Favoriler";
+        }
+
+        // Shuffle
+        indices.sort(() => Math.random() - 0.5);
+
+        gameSession = {
+            active: true,
+            queue: indices,
+            currentIndex: 0,
+            score: 0,
+            sessionCorrect: 0,
+            sessionWrong: 0,
+            currentQ: {},
+            timerInterval: null
+        };
 
         document.getElementById('resultScreen').classList.add('hidden');
-        document.getElementById('gameScreen').classList.remove('hidden');
         document.getElementById('resultScreen').classList.remove('flex');
-        
-        updateUI();
+        document.getElementById('gameScreen').classList.remove('hidden');
+        document.getElementById('modeBadge').classList.remove('hidden');
+        document.getElementById('favBtnMain').classList.remove('hidden');
+
+        closeMenuModal();
         nextQuestion();
     }
 
-    function updateUI() {
-        document.getElementById('score').innerHTML = `<i class="fa-solid fa-star text-yellow-400"></i> Puan: ${gameData.score}`;
-        document.getElementById('counter').innerText = `${gameData.currentIndex + 1} / ${fullWordList.length}`;
-        const percent = (gameData.currentIndex / fullWordList.length) * 100;
-        document.getElementById('progressFill').style.width = `${percent}%`;
-    }
-
+    // --- OYUN AKIŞI ---
     function nextQuestion() {
-        if (gameData.currentIndex >= fullWordList.length) {
+        clearInterval(gameSession.timerInterval);
+        document.getElementById('timerContainer').classList.add('hidden');
+
+        if (gameSession.currentIndex >= gameSession.queue.length) {
             finishGame();
             return;
         }
 
-        gameData.isActive = true;
+        gameSession.active = true;
         document.getElementById('nextBtn').classList.add('hidden');
-        updateUI();
+        document.getElementById('exampleArea').classList.add('hidden');
+        
+        // UI Update
+        document.getElementById('score').innerHTML = `<i class="fa-solid fa-star text-yellow-400"></i> ${gameSession.score}`;
+        document.getElementById('counter').innerText = `${gameSession.currentIndex + 1} / ${gameSession.queue.length}`;
+        const progress = (gameSession.currentIndex / gameSession.queue.length) * 100;
+        document.getElementById('progressFill').style.width = `${progress}%`;
 
-        const listIndex = gameData.questionOrder[gameData.currentIndex];
-        const wordObj = fullWordList[listIndex];
+        // Data Setup
+        const wordIndex = gameSession.queue[gameSession.currentIndex];
+        const wordObj = appData.words[wordIndex];
         
-        const hasSyn = wordObj.syn && wordObj.syn.length > 2;
-        const mode = (Math.random() > 0.5 && hasSyn) ? 'syn' : 'tr';
+        // Mode Check
+        const isInverse = appData.settings.inverse; // TR -> EN
+        const hasSyn = wordObj.syn && wordObj.syn.length > 1;
         
-        gameData.currentQuestion = {
-            word: wordObj.en,
-            correctAnswer: mode === 'tr' ? wordObj.tr : wordObj.syn,
-            mode: mode
+        // Normal Mode: %50 TR, %50 Syn (if exists). Inverse: Always EN from TR.
+        let qMode = 'tr'; 
+        if(!isInverse) {
+            qMode = (Math.random() > 0.5 && hasSyn) ? 'syn' : 'tr';
+        }
+
+        gameSession.currentQ = {
+            index: wordIndex,
+            obj: wordObj,
+            mode: qMode,
+            isInverse: isInverse,
+            correctText: ''
         };
 
-        const mainWordEl = document.getElementById('mainWord');
-        const qTypeEl = document.getElementById('qType');
-        
-        mainWordEl.innerText = gameData.currentQuestion.word;
-        
-        if(mode === 'tr') {
-            qTypeEl.innerText = "Türkçe Anlamı";
-            qTypeEl.className = "absolute top-5 bg-orange-500/20 text-orange-100 border border-orange-200/20 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase backdrop-blur-md shadow-sm";
-            mainWordEl.parentElement.classList.remove('from-purple-600', 'to-fuchsia-600');
-            mainWordEl.parentElement.classList.add('from-indigo-600', 'to-violet-600');
-        } else {
-            qTypeEl.innerText = "Eş Anlamlısı";
-            qTypeEl.className = "absolute top-5 bg-fuchsia-500/20 text-fuchsia-100 border border-fuchsia-200/20 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase backdrop-blur-md shadow-sm";
-            // Renk temasını değiştirerek görsel ipucu ver
-            mainWordEl.parentElement.classList.remove('from-indigo-600', 'to-violet-600');
-            mainWordEl.parentElement.classList.add('from-purple-600', 'to-fuchsia-600');
-        }
+        updateCardUI(wordObj, qMode, isInverse);
+        updateFavIcon(wordIndex);
+        generateOptions(wordIndex, qMode, isInverse);
 
-        generateOptions(wordObj, mode);
+        if(appData.settings.timer) {
+            startTimer();
+        }
     }
 
-    function generateOptions(correctObj, mode) {
+    function updateCardUI(obj, mode, isInverse) {
+        const mainEl = document.getElementById('mainWord');
+        const badge = document.getElementById('qType');
+        
+        // TERS MOD (TR -> EN)
+        if (isInverse) {
+            mainEl.innerText = obj.tr;
+            badge.innerText = "İngilizcesi";
+            badge.className = "absolute top-5 bg-blue-500/20 text-blue-100 border border-blue-200/20 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase backdrop-blur-md";
+            mainEl.parentElement.className = "bg-gradient-to-br from-blue-600 to-cyan-600 rounded-3xl p-6 text-center text-white relative shadow-lg shadow-blue-200 flex flex-col items-center justify-center min-h-[200px] border border-white/10 overflow-hidden";
+            gameSession.currentQ.correctText = obj.en;
+        } 
+        // NORMAL MOD
+        else {
+            mainEl.innerText = obj.en;
+            if (mode === 'tr') {
+                badge.innerText = "Türkçe Anlamı";
+                gameSession.currentQ.correctText = obj.tr;
+                mainEl.parentElement.className = "bg-gradient-to-br from-indigo-600 to-violet-600 rounded-3xl p-6 text-center text-white relative shadow-lg shadow-indigo-200 flex flex-col items-center justify-center min-h-[200px] border border-white/10 overflow-hidden";
+            } else {
+                badge.innerText = "Eş Anlamlısı";
+                const syns = obj.syn.split(',');
+                gameSession.currentQ.correctText = syns[Math.floor(Math.random() * syns.length)].trim();
+                mainEl.parentElement.className = "bg-gradient-to-br from-purple-600 to-fuchsia-600 rounded-3xl p-6 text-center text-white relative shadow-lg shadow-purple-200 flex flex-col items-center justify-center min-h-[200px] border border-white/10 overflow-hidden";
+            }
+        }
+    }
+
+    function generateOptions(correctIndex, mode, isInverse) {
         const area = document.getElementById('optionsArea');
         area.innerHTML = '';
+        
+        // Şık nesnelerini hazırlama (Metin + Türkçe Anlam)
+        let options = [{
+            text: gameSession.currentQ.correctText,
+            tr: isInverse ? "Doğru Cevap" : (mode === 'tr' ? gameSession.currentQ.correctText : appData.words[correctIndex].tr)
+        }];
+        
+        let attempts = 0;
+        while(options.length < 4 && attempts < 100) {
+            attempts++;
+            const rndIdx = Math.floor(Math.random() * appData.words.length);
+            const rndObj = appData.words[rndIdx];
+            let distractorText = "";
+            let distractorTr = rndObj.tr;
 
-        let options = [];
-        let correctText = "";
+            if(isInverse) {
+                distractorText = rndObj.en; // TR sorulunca EN şıklar
+            } else {
+                if(mode === 'tr') distractorText = rndObj.tr;
+                else distractorText = rndObj.syn ? rndObj.syn.split(',')[0].trim() : rndObj.en;
+            }
 
-        if (mode === 'syn') {
-            const syns = correctObj.syn.split(',');
-            correctText = syns[Math.floor(Math.random() * syns.length)].trim();
-        } else {
-            correctText = correctObj.tr;
+            // Şık metni daha önce eklenmediyse ekle
+            if(!options.find(o => o.text === distractorText) && distractorText !== gameSession.currentQ.correctText) {
+                // Eş anlamlı kontrolü
+                if(mode === 'syn' && appData.words[correctIndex].syn.includes(distractorText)) continue;
+                
+                options.push({
+                    text: distractorText,
+                    tr: distractorTr
+                });
+            }
         }
         
-        gameData.currentQuestion.correctText = correctText;
-        options.push(correctText);
-
-        let safetyCounter = 0;
-        while(options.length < 4 && safetyCounter < 200) {
-            safetyCounter++;
-            const randomObj = fullWordList[Math.floor(Math.random() * fullWordList.length)];
-            let distractor = "";
-
-            if(mode === 'tr') {
-                distractor = randomObj.tr;
-            } else {
-                distractor = randomObj.syn ? randomObj.syn.split(',')[0].trim() : randomObj.en;
-            }
-
-            if(!options.includes(distractor) && distractor !== correctText) {
-                if(mode === 'syn' && correctObj.syn.includes(distractor)) continue;
-                options.push(distractor);
-            }
-        }
-
         options.sort(() => Math.random() - 0.5);
 
         options.forEach(opt => {
             const btn = document.createElement('button');
-            // Mobilde daha kolay basılması için min-h-[72px] ve touch-manipulation
-            btn.className = "w-full min-h-[72px] bg-white border-2 border-slate-100 rounded-2xl p-2 text-slate-700 font-bold text-sm hover:bg-slate-50 hover:border-indigo-200 active:scale-[0.98] transition-all flex items-center justify-center text-center shadow-sm touch-manipulation leading-tight select-none";
-            btn.innerText = opt;
-            btn.onclick = () => checkAnswer(btn, opt);
+            btn.className = "w-full min-h-[72px] bg-white border-2 border-slate-100 rounded-2xl p-2 text-slate-700 font-bold text-sm hover:bg-slate-50 active:scale-[0.98] transition-all flex flex-col items-center justify-center text-center shadow-sm touch-manipulation leading-tight select-none";
+            
+            // Ana Metin
+            const mainSpan = document.createElement('span');
+            mainSpan.innerText = opt.text;
+            btn.appendChild(mainSpan);
+
+            // Alt Anlam (Başlangıçta gizli)
+            const trSpan = document.createElement('span');
+            trSpan.className = "text-[10px] font-medium text-black/40 mt-1 hidden option-tr animate-fade-in";
+            trSpan.innerText = opt.tr;
+            btn.appendChild(trSpan);
+
+            btn.onclick = () => checkAnswer(btn, opt.text);
             area.appendChild(btn);
         });
     }
 
-    function checkAnswer(btn, answer) {
-        if (!gameData.isActive) return;
-        gameData.isActive = false;
+    function checkAnswer(btn, answer, timeOut = false) {
+        if (!gameSession.active) return;
+        gameSession.active = false;
+        clearInterval(gameSession.timerInterval);
 
-        const isCorrect = answer === gameData.currentQuestion.correctText;
+        const isCorrect = (answer === gameSession.currentQ.correctText);
         const allBtns = document.querySelectorAll('#optionsArea button');
 
-        if (isCorrect) {
-            btn.className = "w-full min-h-[72px] bg-green-500 border-2 border-green-600 rounded-2xl p-2 text-white font-bold text-sm flex items-center justify-center text-center shadow-md transform scale-[1.02] transition-all";
-            gameData.score += 10;
+        // Şıklardaki tüm anlamları göster
+        document.querySelectorAll('.option-tr').forEach(el => el.classList.remove('hidden'));
+
+        // Logic
+        if (isCorrect && !timeOut) {
+            btn.className = "w-full min-h-[72px] bg-green-500 border-2 border-green-600 rounded-2xl p-2 text-white font-bold text-sm flex flex-col items-center justify-center text-center shadow-md transform scale-[1.02] transition-all";
+            // Doğru bilince metni beyazlat
+            btn.querySelector('.option-tr').classList.remove('text-black/40');
+            btn.querySelector('.option-tr').classList.add('text-white/80');
+
+            gameSession.score += 10;
+            gameSession.sessionCorrect++;
+            appData.stats.totalCorrect++;
+            
+            const idxInWrong = appData.wrongIndices.indexOf(gameSession.currentQ.index);
+            if(idxInWrong > -1) {
+                appData.wrongIndices.splice(idxInWrong, 1);
+            }
         } else {
-            btn.className = "w-full min-h-[72px] bg-red-100 border-2 border-red-200 rounded-2xl p-2 text-red-600 font-bold text-sm flex items-center justify-center text-center opacity-80";
-            // Doğruyu göster
+            if(btn) btn.className = "w-full min-h-[72px] bg-red-100 border-2 border-red-200 rounded-2xl p-2 text-red-600 font-bold text-sm flex flex-col items-center justify-center text-center opacity-80";
+            
+            // Doğruyu bul ve öne çıkar
             allBtns.forEach(b => {
-                if(b.innerText === gameData.currentQuestion.correctText) {
-                    b.className = "w-full min-h-[72px] bg-green-500 border-2 border-green-600 rounded-2xl p-2 text-white font-bold text-sm flex items-center justify-center text-center shadow-md";
+                const bText = b.querySelector('span:first-child').innerText;
+                if(bText === gameSession.currentQ.correctText) {
+                    b.className = "w-full min-h-[72px] bg-green-500 border-2 border-green-600 rounded-2xl p-2 text-white font-bold text-sm flex flex-col items-center justify-center text-center shadow-md";
+                    const bTr = b.querySelector('.option-tr');
+                    bTr.classList.remove('text-black/40');
+                    bTr.classList.add('text-white/80');
                 }
             });
+
+            gameSession.sessionWrong++;
+            if(!appData.wrongIndices.includes(gameSession.currentQ.index)) {
+                appData.wrongIndices.push(gameSession.currentQ.index);
+            }
         }
 
-        gameData.currentIndex++;
-        document.getElementById('score').innerHTML = `<i class="fa-solid fa-star text-yellow-400"></i> Puan: ${gameData.score}`;
+        appData.stats.totalQuestions++;
+        saveData();
+
+        if(gameSession.currentQ.obj.ex) {
+            document.getElementById('exampleText').innerText = gameSession.currentQ.obj.ex;
+            document.getElementById('exampleArea').classList.remove('hidden');
+        }
+
+        gameSession.currentIndex++;
+        document.getElementById('score').innerHTML = `<i class="fa-solid fa-star text-yellow-400"></i> ${gameSession.score}`;
         document.getElementById('nextBtn').classList.remove('hidden');
     }
 
-    function finishGame() {
-        document.getElementById('gameScreen').classList.add('hidden');
-        document.getElementById('resultScreen').classList.remove('hidden');
-        document.getElementById('resultScreen').classList.add('flex');
-        document.getElementById('finalScore').innerText = gameData.score;
+    // --- ZAMANLAYICI ---
+    function startTimer() {
+        document.getElementById('timerContainer').classList.remove('hidden');
+        const fill = document.getElementById('timerFill');
+        let width = 100;
+        fill.style.width = '100%';
+        fill.style.backgroundColor = '#f97316'; // Orange
+
+        let timeLeft = 100; // 100 slices of 100ms = 10 sec
+        gameSession.timerInterval = setInterval(() => {
+            timeLeft--;
+            fill.style.width = `${timeLeft}%`;
+            
+            if(timeLeft < 30) fill.style.backgroundColor = '#ef4444'; // Red
+
+            if(timeLeft <= 0) {
+                clearInterval(gameSession.timerInterval);
+                checkAnswer(null, null, true); // Time out
+            }
+        }, 100);
     }
 
-    // --- JSON YÜKLEME İŞLEMLERİ ---
-
-    function openUploadModal() {
-        document.getElementById('uploadModal').classList.remove('hidden');
-        document.getElementById('fileInput').value = ""; 
-        document.getElementById('jsonInputText').value = "";
+    // --- FAVORİLER ---
+    function toggleFavorite() {
+        if(!gameSession.currentQ.obj) return;
+        const idx = gameSession.currentQ.index;
+        const favIdx = appData.favIndices.indexOf(idx);
+        
+        if(favIdx > -1) {
+            appData.favIndices.splice(favIdx, 1);
+        } else {
+            appData.favIndices.push(idx);
+        }
+        updateFavIcon(idx);
+        saveData();
     }
 
-    function closeUploadModal() {
-        document.getElementById('uploadModal').classList.add('hidden');
+    function updateFavIcon(idx) {
+        const btn = document.getElementById('favBtnMain');
+        if(appData.favIndices.includes(idx)) {
+            btn.innerHTML = '<i class="fa-solid fa-heart text-lg text-pink-500"></i>';
+            btn.classList.add('border-pink-200');
+        } else {
+            btn.innerHTML = '<i class="fa-regular fa-heart text-lg text-slate-300"></i>';
+            btn.classList.remove('border-pink-200');
+        }
     }
+
+    // --- EXPORT / IMPORT ---
+    function exportData() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData.words));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "yds_kelimelerim.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    }
+
+    function openUploadModal() { document.getElementById('uploadModal').classList.remove('hidden'); }
 
     function handleFileSelect(input) {
         if (input.files && input.files[0]) {
@@ -452,41 +668,54 @@
     }
 
     function processAndSaveJSON() {
-        const rawText = document.getElementById('jsonInputText').value.trim();
-        
-        if (!rawText) {
-            alert("Lütfen JSON dosyası seçin veya kod yapıştırın.");
-            return;
-        }
-
+        const raw = document.getElementById('jsonInputText').value;
         try {
-            const jsonData = JSON.parse(rawText);
-            
-            if (!Array.isArray(jsonData)) {
-                alert("Format Hatası: Veri köşeli parantez [] ile başlamalı.");
-                return;
-            }
+            const json = JSON.parse(raw);
+            if(Array.isArray(json)) {
+                appData.words = [...appData.words, ...json];
+                saveData();
+                alert(`${json.length} kelime eklendi.`);
+                document.getElementById('uploadModal').classList.add('hidden');
+            } else { alert("Hatalı format (Array olmalı)"); }
+        } catch(e) { alert("JSON Hatası"); }
+    }
+    
+    function clearDatabase() {
+         if(confirm("Her şey silinecek?")) {
+             localStorage.removeItem(STORAGE_KEY);
+             location.reload();
+         }
+    }
 
-            if (jsonData.length > 0 && (!jsonData[0].en || !jsonData[0].tr)) {
-                alert("Veri Hatası: Her kelimede 'en' ve 'tr' alanları zorunludur.");
-                return;
-            }
+    // --- SONUÇ EKRANI VE SES ---
+    function finishGame() {
+        document.getElementById('gameScreen').classList.add('hidden');
+        document.getElementById('resultScreen').classList.remove('hidden');
+        document.getElementById('resultScreen').classList.add('flex');
+        
+        document.getElementById('finalScore').innerText = gameSession.score;
+        document.getElementById('resCorrect').innerText = gameSession.sessionCorrect;
+        document.getElementById('resWrong').innerText = gameSession.sessionWrong;
+        
+        document.getElementById('modeBadge').classList.add('hidden');
+        document.getElementById('favBtnMain').classList.add('hidden');
+    }
 
-            fullWordList = fullWordList.concat(jsonData);
-            saveData();
-            
-            alert(`${jsonData.length} kelime başarıyla eklendi!`);
-            closeUploadModal();
-            resetAndStart();
-
-        } catch (e) {
-            alert("Hatalı Format: Lütfen JSON kodunu kontrol edin.");
+    function speakCurrentWord() {
+        if(!gameSession.currentQ.obj) return;
+        const text = appData.settings.inverse ? gameSession.currentQ.obj.tr : gameSession.currentQ.obj.en;
+        const lang = appData.settings.inverse ? 'tr-TR' : 'en-US';
+        
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel(); 
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = lang; 
+            window.speechSynthesis.speak(u);
         }
     }
 
-    // Uygulamayı Başlat
-    resetAndStart();
-
+    // Başlat
+    loadData();
 </script>
 </body>
 </html>
